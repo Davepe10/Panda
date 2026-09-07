@@ -1,0 +1,13 @@
+Pandalandia 60.0.0
+
+OK V13: 25 juegos de pareja + 8 individuales; trivia aleatoria con feedback; contenido con menor repetición; motor de rondas y Pet Life 3D intactos.
+
+TS parse: OK
+version 60: OK
+real audio URLs only: OK
+no old procedural Cocker import: OK
+exact 300k STL exists: OK
+desktop body scroll forced: OK
+pet movement strengthened: OK
+
+Note: no dependency-aware next build was executed because node_modules are not present in this workspace.
