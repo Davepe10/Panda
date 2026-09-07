@@ -1,6 +1,6 @@
 {
   "name": "pandalandia",
-  "version": "42.0.0",
+  "version": "50.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
