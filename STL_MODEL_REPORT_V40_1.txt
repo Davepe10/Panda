@@ -1,1 +1,0 @@
-Uploaded STL inspected directly: 300,000 triangles, 150,002 vertices. Source: 1778292652596(1).stl. The included stl_side.png/stl_front.png renders are derived from the actual mesh, not generated concept art.
