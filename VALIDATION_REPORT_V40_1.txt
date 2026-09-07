@@ -1,3 +1,0 @@
-OK V13: 25 juegos de pareja + 8 individuales; trivia aleatoria con feedback; contenido con menor repetición; motor de rondas y Pet Life 3D intactos.
-
-Readability hotfix applied. Existing local audio filtering removed so action samples retain distinct timbre. External CC0 replacement recordings identified but not embedded because direct download requires source access/login; no fake recordings substituted.

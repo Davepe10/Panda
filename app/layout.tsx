@@ -1,6 +1,0 @@
-import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
-import type { Metadata } from 'next'
-import './globals.css'
-import './final.css'
-export const metadata: Metadata={title:'Pandalandia — solo para dos',description:'Un espacio privado para dos: jugar, descubrirse y construir algo juntos.',robots:{index:false,follow:false},viewport:{width:'device-width',initialScale:1,maximumScale:1,userScalable:false,viewportFit:'cover'},themeColor:'#17243a',manifest:'/manifest.webmanifest',icons:{icon:[{url:'/icons/icon-192.png',sizes:'192x192',type:'image/png'},{url:'/icons/icon-512.png',sizes:'512x512',type:'image/png'}],apple:'/icons/icon-192.png'},appleWebApp:{capable:true,statusBarStyle:'black-translucent',title:'Pandalandia'},formatDetection:{telephone:false}}
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="es"><body><ServiceWorkerRegister/>{children}</body></html>}

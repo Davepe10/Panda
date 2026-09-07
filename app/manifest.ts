@@ -1,2 +1,0 @@
-import type {MetadataRoute} from 'next'
-export default function manifest():MetadataRoute.Manifest{return{name:'Pandalandia',short_name:'Pandalandia',description:'Un espacio privado para dos.',start_url:'/app',scope:'/',display:'standalone',display_override:['fullscreen','standalone'],orientation:'any',background_color:'#edf4f7',theme_color:'#15243a',categories:['games','lifestyle'],icons:[{src:'/icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'/icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]}}
