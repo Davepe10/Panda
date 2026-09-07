@@ -1,2 +1,0 @@
-self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const client of list){if('focus'in client)return client.focus()}return clients.openWindow('/app')}))})
-// La recepción Web Push con el navegador cerrado requiere una suscripción Push y un emisor servidor.
