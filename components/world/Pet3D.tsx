@@ -293,18 +293,21 @@ function RiggedPetAsset({type,mood='happy',behavior='idle'}:{type:PetType;mood?:
     const n=String(o.name||'')
     // V26: de-cartoon the local mesh without increasing polygon count.  The source
     // GLB is intentionally mobile-sized, so we refine proportions in place.
-    if(false&&o.geometry&&!o.userData.v26Refined){
+    if(o.geometry&&!o.userData.v29Refined){
      const refine=(sx:number,sy:number,sz:number)=>{o.geometry=o.geometry.clone();o.geometry.computeBoundingBox();const b=o.geometry.boundingBox;if(!b)return;const c=new THREE.Vector3();b.getCenter(c);const pos=o.geometry.getAttribute('position') as THREE.BufferAttribute;for(let i=0;i<pos.count;i++){pos.setXYZ(i,c.x+(pos.getX(i)-c.x)*sx,c.y+(pos.getY(i)-c.y)*sy,c.z+(pos.getZ(i)-c.z)*sz)}pos.needsUpdate=true;o.geometry.computeVertexNormals();o.geometry.computeBoundingSphere()}
-     if(/^Eye_/i.test(n))refine(.66,.68,.68)
-     else if(/^Iris_/i.test(n))refine(.72,.74,.72)
-     else if(/EyeHighlight/i.test(n))refine(.58,.58,.58)
-     else if(/Brow_/i.test(n))refine(.72,.58,.72)
-     else if(/^Nose$/i.test(n))refine(.82,.82,.82)
-     else if(/^MuzzleTop$/i.test(n))refine(.93,.90,.95)
-     else if(/^Muzzle$/i.test(n))refine(.94,.92,.96)
-     else if(/^Head$/i.test(n))refine(.94,.96,.94)
-     else if(/^Ear_/i.test(n))refine(1.04,1.12,.86)
-     o.userData.v26Refined=true
+     if(/^Eye_/i.test(n))refine(.54,.58,.58)
+     else if(/^Iris_/i.test(n))refine(.62,.64,.62)
+     else if(/EyeHighlight/i.test(n))refine(.44,.44,.44)
+     else if(/Brow_/i.test(n))refine(.72,.52,.70)
+     else if(/^Nose$/i.test(n))refine(.76,.72,.78)
+     else if(/^MuzzleTop$/i.test(n))refine(.88,.82,1.04)
+     else if(/^Muzzle$/i.test(n))refine(.90,.86,1.08)
+     else if(/^Head$/i.test(n))refine(.88,.94,.92)
+     else if(/^Crown$/i.test(n))refine(.90,.92,.92)
+     else if(/^Ear_/i.test(n))refine(.92,1.22,.76)
+     else if(/EarFeather/i.test(n))refine(.94,1.10,.84)
+     else if(/^Chest$/i.test(n))refine(1.02,1.06,.92)
+     o.userData.v29Refined=true
     }
     if(/EyeHighlight/i.test(n))o.material=pbr.highlight
     else if(/^Eye_/i.test(n))o.material=pbr.eye
@@ -498,21 +501,22 @@ function ResponsiveRoomCamera(){
  useEffect(()=>{
   const c=camera as THREE.PerspectiveCamera
   const w=Math.max(1,size.width),h=Math.max(1,size.height),aspect=w/h
-  // V27: camera derives from the actual canvas, not device names. This keeps the
-  // full dog visible on narrow phones, landscape phones, tablets and ultrawide desktop.
-  // V28: frame the entire pet first, then reveal more room as width grows.
-  // Narrow canvases need a farther camera and a lower look target so the paws never drop below the viewport.
-  if(aspect<.58){c.position.set(0,.06,7.55);c.fov=47}
-  else if(aspect<.72){c.position.set(0,.08,6.95);c.fov=45}
-  else if(aspect<.95){c.position.set(0,.12,6.30);c.fov=42}
-  else if(aspect<1.25){c.position.set(0,.18,5.72);c.fov=39}
-  else if(aspect>2.0){c.position.set(0,.26,5.20);c.fov=35}
-  else{c.position.set(0,.24,5.05);c.fov=35}
-  c.aspect=aspect;c.lookAt(0,-.18,.05);c.updateProjectionMatrix()
+  // V29: always use a 3/4 camera. A front-on camera hid the long Cocker body behind
+  // its head on phones, which looked like the pet was cut off. Distance/FOV are
+  // derived only from the canvas aspect ratio so every viewport keeps the full pet.
+  if(aspect<.55){c.position.set(3.15,.78,7.95);c.fov=49}
+  else if(aspect<.72){c.position.set(3.00,.82,7.25);c.fov=47}
+  else if(aspect<.92){c.position.set(2.75,.86,6.55);c.fov=44}
+  else if(aspect<1.20){c.position.set(2.55,.92,5.95);c.fov=41}
+  else if(aspect<1.65){c.position.set(2.35,.98,5.35);c.fov=38}
+  else{c.position.set(2.10,1.02,4.95);c.fov=36}
+  c.aspect=aspect
+  c.lookAt(0,-.10,.05)
+  c.updateProjectionMatrix()
  },[camera,size.width,size.height])
  return null
 }
 
 export function PetRoom3D({type,mood='happy',items=[],growthStage='young',behavior='idle',behaviorNonce=0}:{type:PetType;mood?:Mood;items?:string[];growthStage?:GrowthStage;behavior?:PetBehavior;behaviorNonce?:number}){
- return <div className="pet-canvas-room premium-pet-room"><Canvas shadows camera={{position:[0,.42,4.45],fov:32}} dpr={[1,1.36]} style={{touchAction:'pan-y'}} gl={{antialias:true,alpha:false,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping}} onCreated={({gl})=>{gl.toneMappingExposure=1.10;gl.shadowMap.type=THREE.PCFSoftShadowMap}}><ResponsiveRoomCamera/><RoomScene type={type} mood={mood} items={items} growthStage={growthStage} behavior={behavior} behaviorNonce={behaviorNonce}/></Canvas><div className="world-3d-hint premium-3d-hint">Desliza la pantalla con normalidad · usa las acciones para interactuar</div></div>
+ return <div className="pet-canvas-room premium-pet-room"><Canvas shadows camera={{position:[0,.42,4.45],fov:32}} dpr={[1,1.32]} style={{touchAction:'pan-y'}} gl={{antialias:true,alpha:false,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping}} onCreated={({gl})=>{gl.toneMappingExposure=1.10;gl.shadowMap.type=THREE.PCFSoftShadowMap}}><ResponsiveRoomCamera/><RoomScene type={type} mood={mood} items={items} growthStage={growthStage} behavior={behavior} behaviorNonce={behaviorNonce}/></Canvas><div className="world-3d-hint premium-3d-hint">Desliza la pantalla con normalidad · usa las acciones para interactuar</div></div>
 }
