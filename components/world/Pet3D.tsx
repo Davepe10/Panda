@@ -1,7 +1,7 @@
 'use client'
 
 import {Canvas, useFrame, useThree} from '@react-three/fiber'
-import {ContactShadows, OrbitControls, RoundedBox, Sparkles, useAnimations, useGLTF} from '@react-three/drei'
+import {ContactShadows, RoundedBox, Sparkles, useAnimations, useGLTF} from '@react-three/drei'
 import {Component, Suspense, useEffect, useMemo, useRef, type ReactNode} from 'react'
 import * as THREE from 'three'
 import {clone as skeletonClone} from 'three/examples/jsm/utils/SkeletonUtils.js'
@@ -322,10 +322,15 @@ function RiggedPetAsset({type,mood='happy',behavior='idle'}:{type:PetType;mood?:
   const sniff=behavior==='sniff',scratch=behavior==='scratch',stretch=behavior==='stretch'
   const locomotion=behavior==='walk'||behavior==='run'
   const speed=behavior==='run'?9:5.2
+  const eating=behavior==='eat'||behavior==='drink',sleeping=behavior==='sleep',sitting=behavior==='sit'||behavior==='care'
+  const playing=behavior==='play',cleaning=behavior==='clean',barking=behavior==='bark'
   g.rotation.y=locomotion?Math.sin(t*.55)*.05:Math.sin(t*.35)*.015
-  g.position.x=locomotion?Math.sin(t*(behavior==='run'?1.2:.65))*.33:0
-  g.position.y=(scratch?Math.abs(Math.sin(t*8))*.025:stretch?Math.sin(t*2)*.035:0)
-  g.rotation.z=scratch?Math.sin(t*7)*.035:wag?Math.sin(t*6)*.018:0
+  g.position.x=locomotion?Math.sin(t*(behavior==='run'?1.2:.65))*.38:0
+  const actionY=sleeping?-.28:sitting?-.12:eating?-.08+Math.sin(t*5)*.018:playing?Math.max(0,Math.sin(t*3.4))*.12:scratch?Math.abs(Math.sin(t*8))*.025:stretch?Math.sin(t*2)*.035:0
+  g.position.y=THREE.MathUtils.lerp(g.position.y,actionY,.22)
+  g.rotation.x=sleeping?.22:eating?.10:stretch?.12:0
+  g.rotation.z=cleaning?Math.sin(t*13)*.07:scratch?Math.sin(t*7)*.035:wag?Math.sin(t*6)*.018:0
+  if(barking)g.position.y+=Math.abs(Math.sin(t*8))*.025
   if(cockerParts){
    const part=(n:string)=>cockerParts[n]
    const reset=(o?:THREE.Object3D)=>{if(!o)return;const r=o.userData.v20BaseRotation as THREE.Euler|undefined;if(r)o.rotation.copy(r);const q=o.userData.v20BasePosition as THREE.Vector3|undefined;if(q)o.position.copy(q)}
@@ -333,7 +338,8 @@ function RiggedPetAsset({type,mood='happy',behavior='idle'}:{type:PetType;mood?:
    const tongue=part('Tongue');if(tongue){tongue.visible=['pant','lick','eat','drink'].includes(String(behavior));const base=tongue.userData.v20BasePosition as THREE.Vector3|undefined;if(base){tongue.position.copy(base);if(behavior==='pant')tongue.position.y+=Math.sin(t*7)*.035;if(behavior==='lick')tongue.position.y+=Math.abs(Math.sin(t*8))*.08}}
    const tail=part('Tail');if(tail&&(wag||mood==='happy'))tail.rotation.y+=Math.sin(t*(wag?11:6))*(wag?.55:.24)
    const earL=part('Ear_L'),earR=part('Ear_R');if(earL)earL.rotation.z+=Math.sin(t*3.2)*.055;if(earR)earR.rotation.z-=Math.sin(t*3.2)*.055
-   const head=part('Head');if(head){if(sniff){head.rotation.x+=.22+Math.sin(t*4)*.08;head.rotation.y+=Math.sin(t*2.6)*.16}else if(behavior==='bark'){head.rotation.x+=Math.sin(t*9)*.11}else if(behavior==='pant'){head.rotation.x+=.08+Math.sin(t*2)*.025}else if(behavior==='stretch'){head.rotation.x+=.18}}
+   const head=part('Head');if(head){if(sniff){head.rotation.x+=.30+Math.sin(t*4)*.08;head.rotation.y+=Math.sin(t*2.6)*.16}else if(behavior==='bark'){head.rotation.x+=Math.sin(t*9)*.13}else if(behavior==='pant'){head.rotation.x+=.08+Math.sin(t*2)*.025}else if(behavior==='stretch'){head.rotation.x+=.22}else if(behavior==='eat'||behavior==='drink'){head.rotation.x+=.38+Math.sin(t*5)*.035}else if(behavior==='lick'){head.rotation.x+=.10;head.rotation.y+=Math.sin(t*5)*.10}}
+   const lip=model.getObjectByName('LowerLip');if(lip){const base=lip.userData.v20BaseRotation as THREE.Euler|undefined;if(!base)lip.userData.v20BaseRotation=lip.rotation.clone();else lip.rotation.copy(base);if(behavior==='bark'||behavior==='pant')lip.rotation.x+=.22+Math.abs(Math.sin(t*8))*.12}
    if(locomotion){
     const swing=Math.sin(t*speed)*(behavior==='run'?.55:.34)
     const fl=part('Leg_FL'),fr=part('Leg_FR'),bl=part('Leg_BL'),br=part('Leg_BR')
@@ -365,24 +371,19 @@ function PetStatusEffects({mood}:{mood:Mood}){
 
 export function PetModel({type,mood='happy',interactive=true,growthStage='young',items=[],behavior='idle',behaviorNonce=0}:PetModelProps&{growthStage?:GrowthStage}){
  const root=useRef<THREE.Group>(null)
- const pulse=useRef(0)
  const stageScale=growthStage==='baby'?.82:growthStage==='adult'?1.08:1
- useEffect(()=>{if(behaviorNonce>0)pulse.current=1},[behaviorNonce])
- useFrame(({clock,pointer},delta)=>{
+ useFrame(({clock},delta)=>{
   if(!root.current)return
   const t=clock.elapsedTime,sick=mood==='sick',sleepy=mood==='sleepy'
-  const breathe=(sleepy||sick?Math.sin(t*2.05)*.014:Math.sin(t*3.0)*.009)
-  pulse.current=Math.max(0,pulse.current-delta*2.8)
-  const bounce=Math.sin(pulse.current*Math.PI)*.12
-  root.current.position.y=(growthStage==='baby'?-.31:-.18)+Math.sin(t*(sick?1.15:1.9))*(sick?.012:.026)+bounce
-  const look=interactive?THREE.MathUtils.clamp(pointer.x,-.7,.7)*.15:0
-  root.current.rotation.y=THREE.MathUtils.damp(root.current.rotation.y,look+Math.sin(t*.45)*(sick?.025:.065),3.8,delta)
-  root.current.rotation.x=THREE.MathUtils.damp(root.current.rotation.x,interactive?-pointer.y*.025:0,4,delta)
-  root.current.scale.setScalar(stageScale*(1+breathe+pulse.current*.025))
+  const breathe=(sleepy||sick?Math.sin(t*2.05)*.012:Math.sin(t*3.0)*.008)
+  const targetY=growthStage==='baby'?-.31:-.18
+  root.current.position.y=THREE.MathUtils.damp(root.current.position.y,targetY+Math.sin(t*(sick?1.15:1.9))*(sick?.009:.018),4,delta)
+  root.current.rotation.y=THREE.MathUtils.damp(root.current.rotation.y,Math.sin(t*.38)*(sick?.018:.045),3.8,delta)
+  root.current.rotation.x=THREE.MathUtils.damp(root.current.rotation.x,0,4,delta)
+  root.current.scale.setScalar(stageScale*(1+breathe))
  })
- return <group ref={root} onPointerDown={interactive?(e=>{e.stopPropagation();pulse.current=1}):undefined}>
-  <HighFidelityPet type={type} mood={mood} behavior={behavior}/><Wearables items={items}/><PetStatusEffects mood={mood}/>
- </group>
+ void interactive;void behaviorNonce
+ return <group ref={root}><HighFidelityPet type={type} mood={mood} behavior={behavior}/><Wearables items={items}/><PetStatusEffects mood={mood}/></group>
 }
 
 function PreviewScene({type}:{type:PetType}){return <><PBREnvironment intensity={.72}/><ambientLight intensity={.95}/><hemisphereLight args={['#fff7f2','#87756b',1.4]}/><directionalLight position={[3,5,4]} intensity={2.5}/><directionalLight position={[-3,2,2]} intensity={.7} color="#d9e8ff"/><PetModel type={type} interactive={false}/><ContactShadows position={[0,-1.06,0]} opacity={.32} scale={3.5} blur={2.6} far={2.5}/></>}
@@ -460,10 +461,19 @@ function RoomScene({type,mood,items,growthStage,behavior,behaviorNonce}:{type:Pe
   <RoomArchitecture night={night}/><Furniture items={items}/>
   <PetModel type={type} mood={mood} growthStage={growthStage} items={items} behavior={behavior} behaviorNonce={behaviorNonce}/>
   <ContactShadows position={[0,-1.0,0]} opacity={night?.44:.36} scale={4.2} blur={2.5} far={3.2}/>
-  <OrbitControls makeDefault enablePan={false} minDistance={3.05} maxDistance={5.0} minPolarAngle={Math.PI/3.45} maxPolarAngle={Math.PI/2.12} minAzimuthAngle={-.68} maxAzimuthAngle={.68} target={[0,.08,0]} enableDamping dampingFactor={.08}/>
  </>
 }
 
+function ResponsiveRoomCamera(){
+ const {camera,size}=useThree()
+ useEffect(()=>{
+  const c=camera as THREE.PerspectiveCamera
+  if(size.width<=560){c.position.set(0,.38,5.35);c.fov=40}else if(size.width<=900){c.position.set(0,.42,4.95);c.fov=36}else{c.position.set(0,.42,4.45);c.fov=32}
+  c.lookAt(0,.02,0);c.updateProjectionMatrix()
+ },[camera,size.width])
+ return null
+}
+
 export function PetRoom3D({type,mood='happy',items=[],growthStage='young',behavior='idle',behaviorNonce=0}:{type:PetType;mood?:Mood;items?:string[];growthStage?:GrowthStage;behavior?:PetBehavior;behaviorNonce?:number}){
- return <div className="pet-canvas-room premium-pet-room"><Canvas shadows camera={{position:[0,.42,4.45],fov:32}} dpr={[1,1.55]} gl={{antialias:true,alpha:false,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping}} onCreated={({gl})=>{gl.toneMappingExposure=1.12;gl.shadowMap.type=THREE.PCFSoftShadowMap}}><RoomScene type={type} mood={mood} items={items} growthStage={growthStage} behavior={behavior} behaviorNonce={behaviorNonce}/></Canvas><div className="world-3d-hint premium-3d-hint">Toca a tu mascota · caminará, jugará y reaccionará como una mascota viva</div></div>
+ return <div className="pet-canvas-room premium-pet-room"><Canvas shadows camera={{position:[0,.42,4.45],fov:32}} dpr={[1,1.5]} style={{touchAction:'pan-y'}} gl={{antialias:true,alpha:false,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping}} onCreated={({gl})=>{gl.toneMappingExposure=1.10;gl.shadowMap.type=THREE.PCFSoftShadowMap}}><ResponsiveRoomCamera/><RoomScene type={type} mood={mood} items={items} growthStage={growthStage} behavior={behavior} behaviorNonce={behaviorNonce}/></Canvas><div className="world-3d-hint premium-3d-hint">Desliza la pantalla con normalidad · usa las acciones para interactuar</div></div>
 }
