@@ -1,0 +1,8 @@
+V37 static checks:
+- OK: WorldHub usa CockerRealtime3D
+- OK: Package V37
+- OK: CSS mobile pet aspect
+- OK: CSS premium palette
+
+Existing validator:
+OK V13: 25 juegos de pareja + 8 individuales; trivia aleatoria con feedback; contenido con menor repetición; motor de rondas y Pet Life 3D intactos.

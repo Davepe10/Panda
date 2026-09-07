@@ -1,0 +1,1 @@
+Pandalandia V40: production art pass. Inicio reconstruido, Mundo inmersivo, habitación 3D enriquecida, cachorro procedural con proporciones más tiernas, navegación móvil compacta. Sin migración SQL nueva.
