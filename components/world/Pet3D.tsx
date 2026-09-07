@@ -207,11 +207,22 @@ function PBREnvironment({intensity=1}:{intensity?:number}){
 
 function useCockerPBRMaterials(){
  return useMemo(()=>{
+  const size=128,data=new Uint8Array(size*size*4)
+  let seed=26731
+  for(let i=0;i<size*size;i++){
+   seed=(seed*1664525+1013904223)>>>0
+   const grain=148+Math.floor(((seed>>>8)&255)*.34)
+   const strand=(i%size)%7===0?18:0
+   const v=Math.min(235,grain+strand)
+   data[i*4]=v;data[i*4+1]=v;data[i*4+2]=v;data[i*4+3]=255
+  }
+  const furMap=new THREE.DataTexture(data,size,size,THREE.RGBAFormat)
+  furMap.wrapS=furMap.wrapT=THREE.RepeatWrapping;furMap.repeat.set(5,7);furMap.colorSpace=THREE.SRGBColorSpace;furMap.needsUpdate=true
   const make=(opts:THREE.MeshPhysicalMaterialParameters)=>new THREE.MeshPhysicalMaterial({vertexColors:true,metalness:0,...opts})
   return {
-   fur:make({roughness:.88,sheen:.48,sheenRoughness:.82,sheenColor:new THREE.Color('#ffe2cf'),clearcoat:.035,clearcoatRoughness:.8}),
-   lightFur:make({roughness:.91,sheen:.55,sheenRoughness:.78,sheenColor:new THREE.Color('#fff4e8'),clearcoat:.025}),
-   darkFur:make({roughness:.90,sheen:.38,sheenRoughness:.86,sheenColor:new THREE.Color('#d9a88e'),clearcoat:.02}),
+   fur:make({color:'#b86a36',map:furMap,roughness:.88,sheen:.56,sheenRoughness:.78,sheenColor:new THREE.Color('#f5b77f'),clearcoat:.025,clearcoatRoughness:.86}),
+   lightFur:make({color:'#dba775',map:furMap,roughness:.92,sheen:.58,sheenRoughness:.80,sheenColor:new THREE.Color('#ffe2bd'),clearcoat:.018}),
+   darkFur:make({color:'#6f351f',map:furMap,roughness:.91,sheen:.46,sheenRoughness:.84,sheenColor:new THREE.Color('#bd714c'),clearcoat:.015}),
    eye:make({roughness:.055,clearcoat:1,clearcoatRoughness:.025,ior:1.45,specularIntensity:1}),
    iris:make({roughness:.12,clearcoat:.82,clearcoatRoughness:.035,ior:1.4,specularIntensity:1}),
    nose:make({roughness:.20,clearcoat:.72,clearcoatRoughness:.10,ior:1.4,specularIntensity:.9}),
@@ -280,6 +291,21 @@ function RiggedPetAsset({type,mood='happy',behavior='idle'}:{type:PetType;mood?:
    if(o.geometry&&!o.geometry.getAttribute('normal'))o.geometry.computeVertexNormals()
    if(type==='cocker'){
     const n=String(o.name||'')
+    // V26: de-cartoon the local mesh without increasing polygon count.  The source
+    // GLB is intentionally mobile-sized, so we refine proportions in place.
+    if(false&&o.geometry&&!o.userData.v26Refined){
+     const refine=(sx:number,sy:number,sz:number)=>{o.geometry=o.geometry.clone();o.geometry.computeBoundingBox();const b=o.geometry.boundingBox;if(!b)return;const c=new THREE.Vector3();b.getCenter(c);const pos=o.geometry.getAttribute('position') as THREE.BufferAttribute;for(let i=0;i<pos.count;i++){pos.setXYZ(i,c.x+(pos.getX(i)-c.x)*sx,c.y+(pos.getY(i)-c.y)*sy,c.z+(pos.getZ(i)-c.z)*sz)}pos.needsUpdate=true;o.geometry.computeVertexNormals();o.geometry.computeBoundingSphere()}
+     if(/^Eye_/i.test(n))refine(.66,.68,.68)
+     else if(/^Iris_/i.test(n))refine(.72,.74,.72)
+     else if(/EyeHighlight/i.test(n))refine(.58,.58,.58)
+     else if(/Brow_/i.test(n))refine(.72,.58,.72)
+     else if(/^Nose$/i.test(n))refine(.82,.82,.82)
+     else if(/^MuzzleTop$/i.test(n))refine(.93,.90,.95)
+     else if(/^Muzzle$/i.test(n))refine(.94,.92,.96)
+     else if(/^Head$/i.test(n))refine(.94,.96,.94)
+     else if(/^Ear_/i.test(n))refine(1.04,1.12,.86)
+     o.userData.v26Refined=true
+    }
     if(/EyeHighlight/i.test(n))o.material=pbr.highlight
     else if(/^Eye_/i.test(n))o.material=pbr.eye
     else if(/^Iris_/i.test(n))o.material=pbr.iris
@@ -309,7 +335,7 @@ function RiggedPetAsset({type,mood='happy',behavior='idle'}:{type:PetType;mood?:
  },[actions,names,mood,behavior])
  const cockerParts=useMemo(()=>{
   if(type!=='cocker')return null
-  const names=['Head','Ear_L','Ear_R','Tail','Tongue','Leg_FL','Leg_FR','Leg_BL','Leg_BR'] as const
+  const names=['Head','Ear_L','Ear_R','Tail','Tongue','Leg_FL','Leg_FR','Leg_BL','Leg_BR','Muzzle','LowerLip'] as const
   const parts:Record<string,THREE.Object3D|undefined>={}
   for(const n of names){const o=model.getObjectByName(n);if(o){parts[n]=o;o.userData.v20BaseRotation=o.rotation.clone();o.userData.v20BasePosition=o.position.clone()}}
   return parts
@@ -324,22 +350,25 @@ function RiggedPetAsset({type,mood='happy',behavior='idle'}:{type:PetType;mood?:
   const speed=behavior==='run'?9:5.2
   const eating=behavior==='eat'||behavior==='drink',sleeping=behavior==='sleep',sitting=behavior==='sit'||behavior==='care'
   const playing=behavior==='play',cleaning=behavior==='clean',barking=behavior==='bark'
-  g.rotation.y=locomotion?Math.sin(t*.55)*.05:Math.sin(t*.35)*.015
-  g.position.x=locomotion?Math.sin(t*(behavior==='run'?1.2:.65))*.38:0
-  const actionY=sleeping?-.28:sitting?-.12:eating?-.08+Math.sin(t*5)*.018:playing?Math.max(0,Math.sin(t*3.4))*.12:scratch?Math.abs(Math.sin(t*8))*.025:stretch?Math.sin(t*2)*.035:0
-  g.position.y=THREE.MathUtils.lerp(g.position.y,actionY,.22)
-  g.rotation.x=sleeping?.22:eating?.10:stretch?.12:0
-  g.rotation.z=cleaning?Math.sin(t*13)*.07:scratch?Math.sin(t*7)*.035:wag?Math.sin(t*6)*.018:0
-  if(barking)g.position.y+=Math.abs(Math.sin(t*8))*.025
+  const bowlTarget=behavior==='eat'?.48:behavior==='drink'?.78:0
+  const naturalBreath=!locomotion&&!sleeping?Math.sin(t*2.1)*.008:0
+  g.rotation.y=locomotion?Math.sin(t*.55)*.045:eating?-.20:Math.sin(t*.35)*.012
+  const locomotionX=locomotion?Math.sin(t*(behavior==='run'?1.2:.65))*.34:0
+  g.position.x=THREE.MathUtils.lerp(g.position.x,locomotionX+bowlTarget,.11)
+  const actionY=sleeping?-.26:sitting?-.10:eating?-.075+Math.sin(t*4.8)*.012:playing?Math.max(0,Math.sin(t*3.1))*.085:scratch?Math.abs(Math.sin(t*8))*.018:stretch?-.035:0
+  g.position.y=THREE.MathUtils.lerp(g.position.y,actionY+naturalBreath,.18)
+  g.rotation.x=THREE.MathUtils.lerp(g.rotation.x,sleeping?.30:eating?.075:stretch?.10:0,.15)
+  g.rotation.z=cleaning?Math.sin(t*12.5)*.055:scratch?Math.sin(t*7)*.025:wag?Math.sin(t*6)*.012:sleeping?.08:0
+  if(barking)g.position.y+=Math.abs(Math.sin(t*8))*.014
   if(cockerParts){
    const part=(n:string)=>cockerParts[n]
    const reset=(o?:THREE.Object3D)=>{if(!o)return;const r=o.userData.v20BaseRotation as THREE.Euler|undefined;if(r)o.rotation.copy(r);const q=o.userData.v20BasePosition as THREE.Vector3|undefined;if(q)o.position.copy(q)}
    ;['Head','Ear_L','Ear_R','Tail','Leg_FL','Leg_FR','Leg_BL','Leg_BR'].forEach(n=>reset(part(n)))
-   const tongue=part('Tongue');if(tongue){tongue.visible=['pant','lick','eat','drink'].includes(String(behavior));const base=tongue.userData.v20BasePosition as THREE.Vector3|undefined;if(base){tongue.position.copy(base);if(behavior==='pant')tongue.position.y+=Math.sin(t*7)*.035;if(behavior==='lick')tongue.position.y+=Math.abs(Math.sin(t*8))*.08}}
+   const tongue=part('Tongue');if(tongue){tongue.visible=['pant','lick','eat','drink'].includes(String(behavior))&&(behavior==='pant'||behavior==='lick'||Math.sin(t*5)>-.25);const base=tongue.userData.v20BasePosition as THREE.Vector3|undefined;if(base){tongue.position.copy(base);if(behavior==='pant')tongue.position.y+=Math.sin(t*7)*.025;if(behavior==='lick')tongue.position.y+=Math.abs(Math.sin(t*8))*.07;if(behavior==='eat'||behavior==='drink')tongue.position.z+=Math.abs(Math.sin(t*5))*.035}}
    const tail=part('Tail');if(tail&&(wag||mood==='happy'))tail.rotation.y+=Math.sin(t*(wag?11:6))*(wag?.55:.24)
    const earL=part('Ear_L'),earR=part('Ear_R');if(earL)earL.rotation.z+=Math.sin(t*3.2)*.055;if(earR)earR.rotation.z-=Math.sin(t*3.2)*.055
    const head=part('Head');if(head){if(sniff){head.rotation.x+=.30+Math.sin(t*4)*.08;head.rotation.y+=Math.sin(t*2.6)*.16}else if(behavior==='bark'){head.rotation.x+=Math.sin(t*9)*.13}else if(behavior==='pant'){head.rotation.x+=.08+Math.sin(t*2)*.025}else if(behavior==='stretch'){head.rotation.x+=.22}else if(behavior==='eat'||behavior==='drink'){head.rotation.x+=.38+Math.sin(t*5)*.035}else if(behavior==='lick'){head.rotation.x+=.10;head.rotation.y+=Math.sin(t*5)*.10}}
-   const lip=model.getObjectByName('LowerLip');if(lip){const base=lip.userData.v20BaseRotation as THREE.Euler|undefined;if(!base)lip.userData.v20BaseRotation=lip.rotation.clone();else lip.rotation.copy(base);if(behavior==='bark'||behavior==='pant')lip.rotation.x+=.22+Math.abs(Math.sin(t*8))*.12}
+   const lip=model.getObjectByName('LowerLip');if(lip){const base=lip.userData.v20BaseRotation as THREE.Euler|undefined;if(!base)lip.userData.v20BaseRotation=lip.rotation.clone();else lip.rotation.copy(base);if(behavior==='bark'||behavior==='pant')lip.rotation.x+=.18+Math.abs(Math.sin(t*8))*.10;else if(behavior==='eat')lip.rotation.x+=.08+Math.abs(Math.sin(t*5.5))*.12;else if(behavior==='drink')lip.rotation.x+=.05+Math.abs(Math.sin(t*6.5))*.06}
    if(locomotion){
     const swing=Math.sin(t*speed)*(behavior==='run'?.55:.34)
     const fl=part('Leg_FL'),fr=part('Leg_FR'),bl=part('Leg_BL'),br=part('Leg_BR')
@@ -468,12 +497,19 @@ function ResponsiveRoomCamera(){
  const {camera,size}=useThree()
  useEffect(()=>{
   const c=camera as THREE.PerspectiveCamera
-  if(size.width<=560){c.position.set(0,.38,5.35);c.fov=40}else if(size.width<=900){c.position.set(0,.42,4.95);c.fov=36}else{c.position.set(0,.42,4.45);c.fov=32}
-  c.lookAt(0,.02,0);c.updateProjectionMatrix()
- },[camera,size.width])
+  const w=Math.max(1,size.width),h=Math.max(1,size.height),aspect=w/h
+  // V27: camera derives from the actual canvas, not device names. This keeps the
+  // full dog visible on narrow phones, landscape phones, tablets and ultrawide desktop.
+  if(aspect<.72){c.position.set(0,.20,6.55);c.fov=44}
+  else if(aspect<.95){c.position.set(0,.22,5.95);c.fov=41}
+  else if(aspect<1.25){c.position.set(0,.25,5.45);c.fov=39}
+  else if(aspect>2.0){c.position.set(0,.30,5.15);c.fov=35}
+  else{c.position.set(0,.30,4.85);c.fov=35}
+  c.aspect=aspect;c.lookAt(0,.02,.05);c.updateProjectionMatrix()
+ },[camera,size.width,size.height])
  return null
 }
 
 export function PetRoom3D({type,mood='happy',items=[],growthStage='young',behavior='idle',behaviorNonce=0}:{type:PetType;mood?:Mood;items?:string[];growthStage?:GrowthStage;behavior?:PetBehavior;behaviorNonce?:number}){
- return <div className="pet-canvas-room premium-pet-room"><Canvas shadows camera={{position:[0,.42,4.45],fov:32}} dpr={[1,1.5]} style={{touchAction:'pan-y'}} gl={{antialias:true,alpha:false,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping}} onCreated={({gl})=>{gl.toneMappingExposure=1.10;gl.shadowMap.type=THREE.PCFSoftShadowMap}}><ResponsiveRoomCamera/><RoomScene type={type} mood={mood} items={items} growthStage={growthStage} behavior={behavior} behaviorNonce={behaviorNonce}/></Canvas><div className="world-3d-hint premium-3d-hint">Desliza la pantalla con normalidad · usa las acciones para interactuar</div></div>
+ return <div className="pet-canvas-room premium-pet-room"><Canvas shadows camera={{position:[0,.42,4.45],fov:32}} dpr={[1,1.36]} style={{touchAction:'pan-y'}} gl={{antialias:true,alpha:false,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping}} onCreated={({gl})=>{gl.toneMappingExposure=1.10;gl.shadowMap.type=THREE.PCFSoftShadowMap}}><ResponsiveRoomCamera/><RoomScene type={type} mood={mood} items={items} growthStage={growthStage} behavior={behavior} behaviorNonce={behaviorNonce}/></Canvas><div className="world-3d-hint premium-3d-hint">Desliza la pantalla con normalidad · usa las acciones para interactuar</div></div>
 }

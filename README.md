@@ -40,3 +40,5 @@ The Cocker, room architecture, furniture, shop objects and wearable accessories 
 
 ## V23 — disfraces y colecciones
 Ver `README_V23.md`. Incluye 16 disfraces originales comprables con monedas, por nivel, compatibles con mascota macho y hembra.
+
+V26: responsive pet-world rebuild and Cocker material/proportion refinement.
