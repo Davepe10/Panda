@@ -500,12 +500,15 @@ function ResponsiveRoomCamera(){
   const w=Math.max(1,size.width),h=Math.max(1,size.height),aspect=w/h
   // V27: camera derives from the actual canvas, not device names. This keeps the
   // full dog visible on narrow phones, landscape phones, tablets and ultrawide desktop.
-  if(aspect<.72){c.position.set(0,.20,6.55);c.fov=44}
-  else if(aspect<.95){c.position.set(0,.22,5.95);c.fov=41}
-  else if(aspect<1.25){c.position.set(0,.25,5.45);c.fov=39}
-  else if(aspect>2.0){c.position.set(0,.30,5.15);c.fov=35}
-  else{c.position.set(0,.30,4.85);c.fov=35}
-  c.aspect=aspect;c.lookAt(0,.02,.05);c.updateProjectionMatrix()
+  // V28: frame the entire pet first, then reveal more room as width grows.
+  // Narrow canvases need a farther camera and a lower look target so the paws never drop below the viewport.
+  if(aspect<.58){c.position.set(0,.06,7.55);c.fov=47}
+  else if(aspect<.72){c.position.set(0,.08,6.95);c.fov=45}
+  else if(aspect<.95){c.position.set(0,.12,6.30);c.fov=42}
+  else if(aspect<1.25){c.position.set(0,.18,5.72);c.fov=39}
+  else if(aspect>2.0){c.position.set(0,.26,5.20);c.fov=35}
+  else{c.position.set(0,.24,5.05);c.fov=35}
+  c.aspect=aspect;c.lookAt(0,-.18,.05);c.updateProjectionMatrix()
  },[camera,size.width,size.height])
  return null
 }

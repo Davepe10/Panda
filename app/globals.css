@@ -505,3 +505,83 @@ body{background:radial-gradient(circle at 50% -8%,#fff 0,#faf6f9 30%,var(--app-b
  .world-shell{padding-bottom:calc(108px + env(safe-area-inset-bottom))!important}
  .world-top{padding-left:max(10px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important}
 }
+
+
+/* ===== V28 · native-app shell + fully fluid world ===== */
+html,body{min-height:100%;min-height:100dvh;overscroll-behavior-x:none}
+body{background:#211f2a}
+.native-app-shell{min-height:100dvh;background:linear-gradient(180deg,#f9f6f7 0%,#f5f1f3 100%);overflow-x:clip}
+.native-app-shell .app-wrap{min-width:0}
+
+/* Desktop/tablet: frame the product like an installed desktop app, not a stretched website. */
+@media(min-width:901px){
+ .native-app-shell{width:min(1440px,100%);margin-inline:auto;box-shadow:0 0 0 1px rgba(255,255,255,.04),0 30px 90px rgba(0,0,0,.24)}
+ .native-app-shell .app-wrap{width:min(1240px,calc(100% - 48px));padding-top:24px}
+ .world-shell-v28{border-radius:34px;background:rgba(255,255,255,.58);padding:18px;box-shadow:0 20px 70px rgba(39,29,45,.08);backdrop-filter:blur(18px)}
+ .pet-home-layout-v28{grid-template-columns:minmax(0,1fr) minmax(300px,340px)!important}
+ .pet-stage-v28{height:min(68vh,700px)!important;min-height:560px!important}
+}
+
+/* Mobile app surface: no page-in-page white gutters, no desktop header, no card nesting. */
+@media(max-width:900px){
+ body{background:#f6f2f4}
+ .native-app-shell{width:100%;min-height:100dvh;background:#f7f3f5}
+ .native-app-shell>.topbar.new{display:none!important}
+ .native-app-shell .app-wrap{width:100%!important;max-width:none!important;margin:0!important;padding:0 0 calc(92px + env(safe-area-inset-bottom))!important}
+ .world-shell-v28{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;gap:0!important;background:#f7f3f5;overflow:clip}
+ .world-top-v28{padding:calc(12px + env(safe-area-inset-top)) 16px 10px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;background:linear-gradient(180deg,rgba(247,243,245,.98),rgba(247,243,245,.90));position:sticky;top:0;z-index:45;backdrop-filter:blur(20px) saturate(1.2);border-bottom:1px solid rgba(75,54,78,.07)}
+ .world-top-v28 .eyebrow{font-size:9px!important;letter-spacing:.10em!important}
+ .world-top-v28 h1{font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:24px!important;font-weight:800!important;line-height:1.02!important;margin:3px 0 4px!important}
+ .world-top-v28 .pet-meta-line{display:flex!important;gap:5px!important;overflow-x:auto!important;white-space:nowrap!important;scrollbar-width:none!important;max-width:100%!important;padding-bottom:2px}
+ .world-top-v28 .pet-meta-line::-webkit-scrollbar{display:none}
+ .world-top-v28 .pet-meta-line span,.world-top-v28 .pet-profile-edit{font-size:9px!important;padding:5px 7px!important;border-radius:999px!important}
+ .world-top-v28 .level-line,.world-top-v28 .next-unlock{display:none!important}
+ .world-currency{align-self:start!important;padding-top:2px!important}.world-currency>*{background:#fff!important;border:1px solid rgba(71,52,74,.08)!important;box-shadow:0 5px 18px rgba(47,34,50,.06)!important}
+
+ .world-tabs-v28{position:sticky;top:calc(72px + env(safe-area-inset-top));z-index:44;display:flex!important;width:100%!important;margin:0!important;padding:8px 12px!important;gap:6px!important;background:rgba(247,243,245,.94);backdrop-filter:blur(18px);border-bottom:1px solid rgba(75,54,78,.06);overflow-x:auto!important;scrollbar-width:none!important}
+ .world-tabs-v28::-webkit-scrollbar{display:none}.world-tabs-v28 button{flex:0 0 auto!important;min-width:0!important;padding:8px 13px!important;border-radius:999px!important;font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:12px!important;font-weight:700!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(79,58,82,.08)!important;box-shadow:none!important}
+ .world-tabs-v28 button.active{background:#292431!important;color:#fff!important;border-color:#292431!important}
+
+ .pet-home-layout-v28{display:flex!important;flex-direction:column!important;padding:0!important;gap:0!important;background:#f7f3f5}
+ .pet-stage-v28{order:1!important;width:100%!important;height:clamp(360px,52svh,560px)!important;min-height:360px!important;max-height:560px!important;border-radius:0!important;margin:0!important;box-shadow:none!important;background:#29273a!important}
+ .pet-stage-v28 .pet-center-overlay{bottom:12px!important;width:min(88%,360px)!important}
+ .pet-stage-v28 .pet-speech{font-size:11px!important;background:rgba(28,25,35,.64)!important;border-color:rgba(255,255,255,.18)!important}
+ .pet-stage-v28 .pet-touch-zone{inset:0!important;border-radius:0!important}
+
+ .pet-control-panel-v28{order:2!important;display:flex!important;flex-direction:column!important;width:100%!important;gap:8px!important;padding:10px 12px 0!important;background:#f7f3f5}
+ .pet-stats-v28{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;padding:10px!important;border-radius:20px!important;background:rgba(255,255,255,.90)!important;border:1px solid rgba(75,54,78,.07)!important;box-shadow:0 10px 28px rgba(50,36,54,.06)!important}
+ .pet-stats-v28>div:nth-child(5),.pet-stats-v28>div:nth-child(6),.pet-stats-v28>div:nth-child(7){grid-column:auto}
+ .pet-stats-v28>div>span{font-size:9px!important}.pet-stats-v28>div>span b{font-size:9px!important}.pet-stats-v28>div>div{height:4px!important}
+ .pet-actions-v28{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:6px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;overflow-x:auto!important;scrollbar-width:none!important}
+ .pet-actions-v28::-webkit-scrollbar{display:none}
+ .pet-actions-v28 button{min-width:58px!important;min-height:58px!important;height:58px!important;border-radius:18px!important;padding:5px 2px!important;background:#fff!important;border:1px solid rgba(74,54,76,.08)!important;box-shadow:0 7px 18px rgba(49,34,53,.05)!important;font-size:18px!important}
+ .pet-actions-v28 button b{font-size:9px!important}
+ .dog-behavior-card,.special-actions-card,.pet-life-card{margin:10px 12px!important;border-radius:22px!important;background:#fff!important;border:1px solid rgba(75,54,78,.07)!important;box-shadow:0 10px 30px rgba(49,34,53,.05)!important}
+
+ .mobile-nav{left:12px!important;right:12px!important;bottom:max(10px,env(safe-area-inset-bottom))!important;height:68px!important;padding:6px!important;border-radius:25px!important;background:rgba(252,249,251,.90)!important;border:1px solid rgba(75,54,78,.10)!important;backdrop-filter:blur(24px) saturate(1.35)!important;-webkit-backdrop-filter:blur(24px) saturate(1.35)!important;box-shadow:0 16px 45px rgba(37,25,42,.18)!important}
+ .mobile-nav button{height:56px!important;border-radius:19px!important;font-size:9px!important;font-weight:700!important}.mobile-nav button span{font-size:18px!important}.mobile-nav button.active{background:#2b2532!important;color:#fff!important;box-shadow:0 7px 20px rgba(43,37,50,.20)!important}
+}
+
+@media(max-width:480px){
+ .world-top-v28{grid-template-columns:minmax(0,1fr) auto!important;padding-inline:12px!important}.world-top-v28 h1{font-size:22px!important}
+ .world-tabs-v28{top:calc(68px + env(safe-area-inset-top));padding-inline:10px!important}
+ .pet-stage-v28{height:clamp(340px,49svh,470px)!important;min-height:340px!important}
+ .pet-control-panel-v28{padding-inline:10px!important}
+ .pet-stats-v28{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px 5px!important;padding:9px!important}
+ .pet-actions-v28{grid-template-columns:repeat(6,58px)!important;overflow-x:auto!important;padding-bottom:2px!important}
+}
+
+@media(max-width:360px){
+ .world-top-v28 h1{font-size:20px!important}.world-currency span{display:none!important}
+ .pet-stage-v28{height:330px!important;min-height:330px!important}
+ .pet-stats-v28{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+/* landscape phones: scene + controls side by side, still app-like */
+@media(max-width:900px) and (orientation:landscape) and (max-height:520px){
+ .world-top-v28{position:relative!important;padding-top:8px!important}.world-tabs-v28{position:relative!important;top:auto!important}
+ .pet-home-layout-v28{display:grid!important;grid-template-columns:minmax(0,1.35fr) minmax(250px,.65fr)!important;gap:8px!important;padding:8px!important}
+ .pet-stage-v28{height:calc(100dvh - 128px)!important;min-height:300px!important;border-radius:22px!important}
+ .pet-control-panel-v28{padding:0!important;align-self:start!important}.pet-stats-v28{grid-template-columns:repeat(2,minmax(0,1fr))!important}.pet-actions-v28{grid-template-columns:repeat(3,minmax(0,1fr))!important;overflow:visible!important}.pet-actions-v28 button{min-width:0!important}
+ .dog-behavior-card,.special-actions-card,.pet-life-card{margin-inline:8px!important}
+}
