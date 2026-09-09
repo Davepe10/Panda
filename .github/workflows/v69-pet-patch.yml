@@ -1,4 +1,4 @@
-name: V69 Pet Geometry Patch
+name: V70 Final Mobile UI
 
 on:
   push:
@@ -10,8 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  patch-pet:
-    if: ${{ !contains(github.event.head_commit.message, '[pet-v69]') }}
+  finalize-v70:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,43 +19,185 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Correct ground contact, gait and wearables
+      - name: Apply final UI, cache and Mia accessory architecture
         shell: bash
         run: |
           node <<'NODE'
           const fs=require('fs')
-          const p='components/world/Pet3D.tsx'
-          let s=fs.readFileSync(p,'utf8')
-          const swaps=[
-            ["const freq=run?9.6:behavior==='sniff'?4.2:6.4,amp=run?.66:behavior==='sniff'?.28:.44","const freq=run?9.2:behavior==='sniff'?4.0:6.0,amp=run?.30:behavior==='sniff'?.14:.18"],
-            ["const baseY=sleep?-.20:sit?-.08:locomotion?Math.abs(Math.sin(t*freq))*0.05:Math.sin(t*2.1)*.008","const baseY=sleep?-.065:sit?-.018:locomotion?Math.abs(Math.sin(t*freq))*0.010:Math.sin(t*2.1)*.004"],
-            ["position={[x,-.55,z]}","position={[x,-.50,z]}"],
-            ["position={[0,-.18,0]} scale={[.23,.58,.23]}","position={[0,-.13,0]} scale={[.24,.50,.24]}"],
-            ["<Paw position={[0,-.55,.08]}","<Paw position={[0,-.45,.08]}"],
-            ["growthStage==='baby'?-.04:growthStage==='adult'?.24:.15","growthStage==='baby'?-.08:growthStage==='adult'?.18:.09"],
-            ["position={[0,1.01,.18]}","position={[0,.84,.22]}"],
-            ["position={[0,1.05,.08]}","position={[0,.90,.11]}"],
-            ["position={[0,1.07,.10]}","position={[0,.91,.13]}"],
-            ["position={[0,1.15,.09]}","position={[0,1.04,.10]}"],
-            ["position={[0,1.17,.09]}","position={[0,1.06,.10]}"],
-          ]
-          let changed=0
-          for(const [from,to] of swaps){
-            if(s.includes(from)){s=s.replace(from,to);changed++}
+          function replaceOne(s,from,to,label){
+            if(!s.includes(from)) throw new Error(`Missing patch target: ${label}`)
+            return s.replace(from,to)
           }
-          if(changed<9){console.error(`Expected at least 9 pet fixes, applied ${changed}`);process.exit(1)}
-          fs.writeFileSync(p,s)
-          console.log(`Applied ${changed} V69 pet fixes`)
+
+          // 1) Mia: keep fixed paws, and make standalone head accessories follow the real head group.
+          const petPath='components/world/Pet3D.tsx'
+          let pet=fs.readFileSync(petPath,'utf8')
+          pet=replaceOne(pet,
+            "function PremiumCocker({mood='happy',behavior='idle',behaviorNonce=0,onInteract}:{mood?:Mood;behavior?:PetBehavior;behaviorNonce?:number;onInteract?:()=>void}){",
+            "function PremiumCocker({mood='happy',behavior='idle',behaviorNonce=0,items=[],onInteract}:{mood?:Mood;behavior?:PetBehavior;behaviorNonce?:number;items?:string[];onInteract?:()=>void}){",
+            'PremiumCocker items prop')
+
+          pet=replaceOne(pet,
+            "   <Nose position={[0,-.02,.72]} scale={.90}/><Mouth mood={mood} z={.73}/><Blush x={-.34} z={.58}/><Blush x={.34} z={.58}/>\n  </group>",
+            "   <Nose position={[0,-.02,.72]} scale={.90}/><Mouth mood={mood} z={.73}/><Blush x={-.34} z={.58}/><Blush x={.34} z={.58}/>\n   <Wearables items={items} behavior={behavior} anchor=\"head\"/>\n  </group>",
+            'head wearable mount')
+
+          pet=replaceOne(pet,
+            "function Wearables({items=[],behavior='idle'}:{items?:string[];behavior?:PetBehavior}){\n const has=(k:string)=>items.includes(k)",
+            "const HEAD_WEARABLE_IDS=new Set(['bow_red','cap','flower_crown','gold_crown','diamond_crown','round_glasses','heart_glasses'])\nfunction Wearables({items=[],behavior='idle',anchor='body'}:{items?:string[];behavior?:PetBehavior;anchor?:'head'|'body'}){\n const mountedItems=items.filter(id=>anchor==='head'?HEAD_WEARABLE_IDS.has(id):!HEAD_WEARABLE_IDS.has(id))\n const has=(k:string)=>mountedItems.includes(k)",
+            'wearable anchor registry')
+
+          const headPositions=[
+            ["position={[0,.84,.22]}","position={[0,.34,-.20]}"],
+            ["position={[0,.90,.11]}","position={[0,.40,-.31]}"],
+            ["position={[0,.91,.13]}","position={[0,.41,-.29]}"],
+            ["position={[0,1.04,.10]}","position={[0,.54,-.32]}"],
+            ["position={[0,1.06,.10]}","position={[0,.56,-.32]}"],
+            ["position={[0,.62,.65]}","position={[0,.12,.23]}"],
+            ["position={[0,.62,.67]}","position={[0,.12,.25]}"]
+          ]
+          for(const [a,b] of headPositions){ if(pet.includes(a)) pet=pet.replace(a,b) }
+
+          pet=replaceOne(pet,
+            "function ProceduralPet({type,mood,behavior='idle',behaviorNonce=0,onInteract}:{type:PetType;mood:Mood;behavior?:PetBehavior;behaviorNonce?:number;onInteract?:()=>void}){\n return type==='panda'?<Panda mood={mood}/>:type==='shiba'?<Shiba mood={mood}/>:type==='capybara'?<Capybara mood={mood}/>:<PremiumCocker mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} onInteract={onInteract}/>\n}",
+            "function ProceduralPet({type,mood,behavior='idle',behaviorNonce=0,items=[],onInteract}:{type:PetType;mood:Mood;behavior?:PetBehavior;behaviorNonce?:number;items?:string[];onInteract?:()=>void}){\n return type==='panda'?<Panda mood={mood}/>:type==='shiba'?<Shiba mood={mood}/>:type==='capybara'?<Capybara mood={mood}/>:<PremiumCocker mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} items={items} onInteract={onInteract}/>\n}",
+            'ProceduralPet items')
+
+          pet=replaceOne(pet,
+            "function HighFidelityPet({type,mood,behavior='idle',behaviorNonce=0,onInteract}:{type:PetType;mood:Mood;behavior?:PetBehavior;behaviorNonce?:number;onInteract?:()=>void}){\n if(type==='cocker')return <PremiumCocker mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} onInteract={onInteract}/>",
+            "function HighFidelityPet({type,mood,behavior='idle',behaviorNonce=0,items=[],onInteract}:{type:PetType;mood:Mood;behavior?:PetBehavior;behaviorNonce?:number;items?:string[];onInteract?:()=>void}){\n if(type==='cocker')return <PremiumCocker mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} items={items} onInteract={onInteract}/>",
+            'HighFidelityPet items')
+          pet=pet.replace("const fallback=<ProceduralPet type={type} mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} onInteract={onInteract}/>","const fallback=<ProceduralPet type={type} mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} items={items} onInteract={onInteract}/>")
+          pet=replaceOne(pet,
+            "return <group ref={root}><HighFidelityPet type={type} mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} onInteract={interactive?onInteract:undefined}/><Wearables items={items} behavior={behavior}/><PetStatusEffects mood={mood}/></group>",
+            "return <group ref={root}><HighFidelityPet type={type} mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} items={items} onInteract={interactive?onInteract:undefined}/><Wearables items={items} behavior={behavior} anchor=\"body\"/><PetStatusEffects mood={mood}/></group>",
+            'PetModel anchored wearables')
+          fs.writeFileSync(petPath,pet)
+
+          // 2) Final mobile contract: eliminate hidden desktop widths, enforce contrast, native-like density.
+          const cssPath='app/responsive-v69.css'
+          let css=fs.readFileSync(cssPath,'utf8')
+          const v70=`
+
+/* V70 — screenshot-verified mobile contract. No horizontal clipping, readable text, app-like density. */
+:root{--v70-ink:#14243a;--v70-muted:#526277;--v70-line:#d9e5eb;--v70-card:#ffffff;--v70-teal:#2d746a;--v70-navy:#153a57}
+.native-app-shell,.native-app-shell *{box-sizing:border-box}
+.native-app-shell .home63-copy h1,
+.native-app-shell .home63-copy h1 em,
+.native-app-shell .home63-copy h1 *{
+  color:#f7fbff!important;
+  -webkit-text-fill-color:#f7fbff!important;
+  background:none!important;
+  background-image:none!important;
+  opacity:1!important;
+  filter:none!important;
+  text-shadow:none!important;
+}
+.native-app-shell .home63-copy h1 em{color:#d8f2ff!important;-webkit-text-fill-color:#d8f2ff!important}
+.native-app-shell [data-active-page="jugar"] .game-shell,
+.native-app-shell [data-active-page="jugar"] .game-hub-v9,
+.native-app-shell [data-active-page="jugar"] .arcade-hero,
+.native-app-shell [data-active-page="jugar"] .arcade-copy,
+.native-app-shell [data-active-page="jugar"] .arcade-hero-actions,
+.native-app-shell [data-active-page="jugar"] .player-panel,
+.native-app-shell [data-active-page="jugar"] .continue-hero,
+.native-app-shell [data-active-page="jugar"] .continue-section,
+.native-app-shell [data-active-page="jugar"] .section-title,
+.native-app-shell [data-active-page="jugar"] .pending-rail,
+.native-app-shell [data-active-page="jugar"] .pending-card,
+.native-app-shell [data-active-page="jugar"] .pending-main,
+.native-app-shell [data-active-page="jugar"] .game-grid,
+.native-app-shell [data-active-page="jugar"] .mode-lanes{
+  min-width:0!important;width:100%!important;max-width:100%!important;
+}
+.native-app-shell [data-active-page="jugar"] .game-shell{overflow-x:clip!important}
+.native-app-shell [data-active-page="jugar"] :is(.arcade-hero-actions .btn,.continue-hero .btn,.section-title>button,.pending-actions button){overflow:visible!important;text-overflow:clip!important}
+.native-app-shell [data-active-page="jugar"] .arcade-hero-actions .btn{display:flex!important;align-items:center!important;justify-content:center!important}
+.native-app-shell [data-active-page="jugar"] .continue-copy{min-width:0!important}
+.native-app-shell [data-active-page="jugar"] .continue-copy p{white-space:normal!important;overflow-wrap:anywhere!important}
+.native-app-shell [data-active-page="jugar"] .pending-main{display:grid!important;overflow:visible!important}
+.native-app-shell [data-active-page="jugar"] .pending-main>span:last-child{min-width:0!important}
+.native-app-shell .world-top-v30 .pet-meta-line span,
+.native-app-shell .world-top-v30 .pet-profile-edit{color:#183044!important;-webkit-text-fill-color:#183044!important;background:#f8fbfc!important;opacity:1!important}
+.native-app-shell .world-top-v30 .pet-meta-line span *{color:inherit!important;-webkit-text-fill-color:currentColor!important}
+.native-app-shell .world-currency,.native-app-shell .world-currency *{color:#20374b!important;-webkit-text-fill-color:currentColor!important;opacity:1!important}
+.native-app-shell .world-currency{background:#f9fcfd!important}
+.native-app-shell .world-tabs-v30 button{color:#52657a!important;-webkit-text-fill-color:#52657a!important;opacity:1!important}
+.native-app-shell .world-tabs-v30 button.active{color:#fff!important;-webkit-text-fill-color:#fff!important}
+.native-app-shell :is(.pet-needs-v63,.pet-autonomy-v63,.pet-life-v63,.special-actions-card,.shop-card,.wardrobe-card,.garden-card,.expedition-card) :is(p,small,span,label){opacity:1!important}
+
+@media(max-width:767px){
+ .native-app-shell .app-wrap{padding-inline:10px!important;padding-bottom:calc(92px + env(safe-area-inset-bottom))!important}
+ .native-app-shell .mobile-appbar{margin-left:-10px!important;margin-right:-10px!important;padding-left:14px!important;padding-right:14px!important}
+ .native-app-shell .home63-hero{padding:22px 18px!important;border-radius:26px!important}
+ .native-app-shell .home63-copy h1{font-size:clamp(2.55rem,12vw,3.7rem)!important;line-height:.92!important;letter-spacing:-.055em!important}
+ .native-app-shell .home63-copy p{font-size:15px!important;line-height:1.5!important}
+ .native-app-shell .home63-actions{grid-template-columns:1fr!important}
+ .native-app-shell .home63-actions button{min-height:52px!important;width:100%!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-hero{display:block!important;padding:22px 18px!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-copy{display:block!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-copy h1{font-size:clamp(2.35rem,11.5vw,3.5rem)!important;max-width:100%!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-hero-actions{display:grid!important;grid-template-columns:1fr!important;margin-top:18px!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-hero-actions .btn{width:100%!important;max-width:100%!important;min-height:52px!important;padding:12px 14px!important}
+ .native-app-shell [data-active-page="jugar"] .player-panel{margin-top:14px!important;width:100%!important}
+ .native-app-shell [data-active-page="jugar"] .game-subnav{width:100%!important;max-width:100%!important;overflow-x:auto!important}
+ .native-app-shell [data-active-page="jugar"] .continue-hero{width:100%!important;max-width:100%!important;grid-template-columns:52px minmax(0,1fr)!important;overflow:hidden!important}
+ .native-app-shell [data-active-page="jugar"] .continue-hero .btn{grid-column:1/-1!important;width:100%!important;min-width:0!important}
+ .native-app-shell [data-active-page="jugar"] .section-title{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important}
+ .native-app-shell [data-active-page="jugar"] .section-title>button{justify-self:start!important;max-width:100%!important;white-space:normal!important}
+ .native-app-shell [data-active-page="jugar"] .pending-rail,
+ .native-app-shell [data-active-page="jugar"] .pending-list,
+ .native-app-shell [data-active-page="jugar"] .game-turn-list,
+ .native-app-shell [data-active-page="jugar"] .game-grid,
+ .native-app-shell [data-active-page="jugar"] .arcade-grid,
+ .native-app-shell [data-active-page="jugar"] .mode-lanes{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-columns:auto!important;grid-auto-flow:row!important;overflow:visible!important}
+ .native-app-shell [data-active-page="jugar"] :is(.pending-card,.game-card,.arcade-game-card,.mode-lanes button){width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important}
+ .native-app-shell [data-active-page="jugar"] .pending-main{grid-template-columns:48px minmax(0,1fr)!important}
+ .native-app-shell .world-top-v30{grid-template-columns:minmax(0,1fr)!important;padding:18px!important}
+ .native-app-shell .world-top-v30>div:first-child{min-width:0!important}
+ .native-app-shell .pet-meta-line{width:100%!important;max-width:100%!important}
+ .native-app-shell .world-currency{position:static!important;justify-self:start!important;width:auto!important;max-width:100%!important}
+ .native-app-shell .world-tabs-v30{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;overflow:visible!important;width:100%!important}
+ .native-app-shell .world-tabs-v30 button{min-width:0!important!important;padding:10px 5px!important;font-size:12px!important;white-space:normal!important}
+ .native-app-shell .pet-stage-premium-v63{height:clamp(335px,44dvh,430px)!important;min-height:335px!important}
+ .native-app-shell .mobile-nav{width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important}
+}
+@media(max-width:390px){
+ .native-app-shell .app-wrap{padding-inline:8px!important}
+ .native-app-shell .mobile-appbar{margin-left:-8px!important;margin-right:-8px!important}
+ .native-app-shell .world-tabs-v30 button{font-size:11px!important;padding:9px 3px!important}
+ .native-app-shell .mobile-nav button{font-size:11px!important}
+}
+`
+          css += v70
+          fs.writeFileSync(cssPath,css)
+
+          // 3) Service worker: new cache and network-first for app code/styles so deployments are immediately visible.
+          const swPath='public/sw.js'
+          let sw=fs.readFileSync(swPath,'utf8')
+          sw=sw.replace("const CACHE='pandalandia-v64-shell'","const CACHE='pandalandia-v70-shell'")
+          sw=sw.replace(
+            " const asset=/\\.(?:js|css|png|jpg|jpeg|webp|svg|woff2?|glb|gltf|bin)$/i.test(url.pathname)\n if(asset)event.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(res=>{if(res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(req,copy))}return res})))",
+            " const appCode=/\\.(?:js|css)$/i.test(url.pathname)\n if(appCode){event.respondWith(fetch(req).then(res=>{if(res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(req,copy))}return res}).catch(()=>caches.match(req)));return}\n const asset=/\\.(?:png|jpg|jpeg|webp|svg|woff2?|glb|gltf|bin)$/i.test(url.pathname)\n if(asset)event.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(res=>{if(res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(req,copy))}return res})))")
+          fs.writeFileSync(swPath,sw)
+
+          // 4) Version marker.
+          const pkgPath='package.json'
+          const pkg=JSON.parse(fs.readFileSync(pkgPath,'utf8'));pkg.version='70.0.0';fs.writeFileSync(pkgPath,JSON.stringify(pkg,null,2)+'\n')
+
+          // Assertions: fail before commit if the intended architecture did not land.
+          const finalPet=fs.readFileSync(petPath,'utf8'),finalCss=fs.readFileSync(cssPath,'utf8'),finalSw=fs.readFileSync(swPath,'utf8')
+          for(const marker of ['HEAD_WEARABLE_IDS','anchor="head"','anchor="body"','items={items}']) if(!finalPet.includes(marker)) throw new Error('Pet marker missing: '+marker)
+          for(const marker of ['V70 — screenshot-verified','-webkit-text-fill-color:#f7fbff','grid-template-columns:minmax(0,1fr)!important']) if(!finalCss.includes(marker)) throw new Error('CSS marker missing: '+marker)
+          if(!finalSw.includes('pandalandia-v70-shell')||!finalSw.includes('const appCode=')) throw new Error('Service worker V70 patch missing')
+          console.log('V70 source assertions OK')
           NODE
-      - name: Validate source
+      - name: Commit final V70 source
         run: |
-          node scripts/validate-project.mjs
-          node scripts/verify-deploy-files.mjs
-      - name: Commit generated source fix
-        run: |
-          git config user.name 'Pandalandia V69 Bot'
+          git config user.name 'Pandalandia V70'
           git config user.email 'actions@users.noreply.github.com'
-          git add components/world/Pet3D.tsx
+          git add components/world/Pet3D.tsx app/responsive-v69.css public/sw.js package.json
+          git diff --cached --check
           git diff --cached --quiet && exit 0
-          git commit -m 'fix: ground Mia and attach wearables better [pet-v69]'
+          git commit -m 'fix: finalize native mobile UI and Mia wearable anchors [v70]'
           git push origin HEAD:responsive-unified-v69
