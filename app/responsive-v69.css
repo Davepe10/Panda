@@ -100,3 +100,125 @@ html,body,#__next,.native-app-shell{width:100%;max-width:100%;overflow-x:hidden!
  .native-app-shell [data-active-page="jugar"] .game-grid.arcade-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
  .native-app-shell :is(.shop-grid,.wardrobe-grid){grid-template-columns:repeat(4,minmax(0,1fr))!important}
 }
+
+/* V69.1 — visual accessibility + native-app appearance */
+.native-app-shell{
+  background:linear-gradient(180deg,#f4fbfb 0%,#eef5f7 48%,#f7f4f7 100%)!important;
+  min-height:100dvh!important;
+}
+.native-app-shell .mobile-appbar{
+  background:rgba(250,253,253,.90)!important;
+  border:1px solid rgba(23,34,54,.08)!important;
+  box-shadow:0 10px 28px rgba(27,45,65,.08)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(1.35)!important;
+  backdrop-filter:blur(18px) saturate(1.35)!important;
+}
+.native-app-shell .mobile-brand strong{color:#172236!important}
+.native-app-shell .mobile-settings{color:#24364c!important;background:#fff!important;border:1px solid #dce6ec!important}
+.native-app-shell .mobile-nav{
+  background:rgba(250,252,253,.92)!important;
+  border:1px solid rgba(30,48,69,.16)!important;
+  box-shadow:0 12px 36px rgba(24,43,63,.18)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(1.4)!important;
+  backdrop-filter:blur(22px) saturate(1.4)!important;
+  border-radius:24px!important;
+  padding:6px!important;
+}
+.native-app-shell .mobile-nav button{color:#5d6878!important;background:transparent!important;min-width:0!important}
+.native-app-shell .mobile-nav button span{color:#526174!important}
+.native-app-shell .mobile-nav button.active{color:#102637!important;background:linear-gradient(145deg,#75ddd0,#87c5e9)!important;box-shadow:0 8px 20px rgba(74,154,169,.20)!important}
+.native-app-shell .mobile-nav button.active span{color:#102637!important}
+
+/* World header: the previous white-on-translucent chips failed contrast */
+.native-app-shell .world-top-v30 .pet-meta-line span,
+.native-app-shell .world-top-v30 .pet-profile-edit{
+  color:#183044!important;
+  background:#f7fbfc!important;
+  border:1px solid rgba(18,48,68,.14)!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+.native-app-shell .world-top-v30 .pet-meta-line span b{color:#183044!important}
+.native-app-shell .world-top-v30 .pet-meta-line .healthy{color:#175b49!important;background:#dff3eb!important;border-color:#b7dfd2!important}
+.native-app-shell .world-currency{
+  background:#fff!important;
+  border:1px solid #dbe6ec!important;
+  box-shadow:0 8px 22px rgba(23,44,63,.10)!important;
+}
+.native-app-shell .world-currency b{color:#152a3d!important}
+.native-app-shell .world-currency span{color:#53647a!important}
+.native-app-shell .world-tabs-v30{background:#fff!important;border:1px solid #dde6ec!important;box-shadow:0 7px 18px rgba(24,43,62,.06)!important}
+.native-app-shell .world-tabs-v30 button{color:#5d6d81!important;background:transparent!important}
+.native-app-shell .world-tabs-v30 button.active{color:#fff!important;background:#24685f!important;box-shadow:0 7px 16px rgba(36,104,95,.18)!important}
+
+/* Games: high contrast actions and no hidden/cropped labels */
+.native-app-shell .arcade-hero-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;width:100%!important}
+.native-app-shell .arcade-hero-actions .btn{width:100%!important;min-width:0!important;white-space:normal!important;min-height:52px!important;padding:12px 16px!important}
+.native-app-shell .arcade-hero-actions .game-primary{background:#fff!important;color:#17243a!important;border:1px solid rgba(255,255,255,.84)!important}
+.native-app-shell .arcade-hero-actions .secondary{background:#5bd0c1!important;color:#0e2e32!important;border:1px solid #77e0d4!important}
+.native-app-shell .player-panel{background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.22)!important}
+.native-app-shell .player-panel :is(small,span){color:#e8f0f7!important}
+.native-app-shell .player-panel b{color:#fff!important}
+.native-app-shell .player-panel .presence{color:#eef5fa!important;background:rgba(11,28,47,.28)!important}
+.native-app-shell .game-subnav{background:#fff!important;border:1px solid #dce6ed!important}
+.native-app-shell .game-subnav button{color:#59697e!important}
+.native-app-shell .game-subnav button.active{color:#fff!important;background:#173d5a!important}
+.native-app-shell .continue-hero{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;align-items:center!important;gap:14px!important}
+.native-app-shell .continue-hero .btn{background:#fff!important;color:#6b2635!important;border:1px solid rgba(255,255,255,.88)!important;white-space:normal!important;min-width:118px!important}
+.native-app-shell .continue-hero :is(h2,p,b,span){color:#fff!important}
+.native-app-shell .mode-lanes button{color:#172236!important;background:#fff!important;border:1px solid #dce6ed!important}
+.native-app-shell .mode-lanes button :is(b,em){color:#172236!important}
+.native-app-shell .mode-lanes button small{color:#5c697b!important}
+.native-app-shell .section-title :is(h2,b){color:#172236!important}
+.native-app-shell .section-title :is(p,span){color:#5c697b!important}
+.native-app-shell .section-title>button{color:#244c66!important;background:#edf5f8!important;border:1px solid #d4e2e9!important}
+.native-app-shell .pending-card,.native-app-shell .game-card{background:#fff!important;color:#172236!important}
+.native-app-shell .pending-card :is(b,strong,h3),.native-app-shell .game-card :is(b,strong,h3){color:#172236!important}
+.native-app-shell .pending-card :is(small,em,i,p,span),.native-app-shell .game-card :is(small,p,span){color:#5d6879!important}
+.native-app-shell .pending-actions button{color:#fff!important;background:#244d67!important}
+.native-app-shell .pending-actions button.danger{color:#7a2436!important;background:#fbe9ed!important}
+
+@media(max-width:767px){
+ body{background:#eef5f7!important}
+ .native-app-shell .app-wrap{padding-top:8px!important;padding-bottom:calc(94px + env(safe-area-inset-bottom))!important}
+ .native-app-shell .mobile-appbar{position:sticky!important;top:0!important;z-index:50!important;margin:0 0 8px!important;border-radius:0 0 20px 20px!important;min-height:64px!important;padding:10px 12px!important}
+ .native-app-shell .mobile-brand{gap:9px!important}
+ .native-app-shell .mobile-brand>span{width:44px!important;height:44px!important;border-radius:15px!important}
+ .native-app-shell .mobile-settings{width:44px!important;height:44px!important;border-radius:15px!important}
+ .native-app-shell .mobile-nav{width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important;bottom:calc(8px + env(safe-area-inset-bottom))!important}
+ .native-app-shell .mobile-nav button{font-size:12px!important;line-height:1.1!important;padding:7px 3px!important;border-radius:18px!important;min-height:58px!important}
+ .native-app-shell .mobile-nav button span{font-size:22px!important;margin-bottom:3px!important}
+ .native-app-shell .world-top-v30{padding:18px 16px!important;border-radius:24px!important}
+ .native-app-shell .world-top-v30 h1{font-size:2.15rem!important;line-height:1!important;margin-bottom:10px!important}
+ .native-app-shell .pet-meta-line{display:flex!important;flex-wrap:wrap!important;gap:6px!important}
+ .native-app-shell .pet-meta-line span,.native-app-shell .pet-profile-edit{font-size:12px!important;padding:7px 10px!important;border-radius:999px!important}
+ .native-app-shell .world-currency{display:flex!important;align-items:center!important;gap:8px!important;width:max-content!important;max-width:100%!important;padding:9px 12px!important;border-radius:16px!important}
+ .native-app-shell .world-currency :is(b,span){font-size:13px!important}
+ .native-app-shell .world-tabs-v30{gap:2px!important;border-radius:20px!important;padding:5px!important}
+ .native-app-shell .world-tabs-v30 button{padding:10px 13px!important;border-radius:15px!important;font-size:13px!important}
+ .native-app-shell .pet-stage-premium-v63{height:clamp(340px,46dvh,440px)!important;min-height:340px!important;border-radius:24px!important;margin-bottom:10px!important}
+ .native-app-shell .pet-stage-topline{top:12px!important;left:12px!important;right:12px!important}
+ .native-app-shell .pet-live-chip,.native-app-shell .pet-behavior-chip{font-size:11px!important;padding:8px 10px!important}
+ .native-app-shell .pet-speech-v63{left:12px!important;right:12px!important;bottom:12px!important;max-width:calc(100% - 24px)!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-hero{padding:22px 16px!important;border-radius:24px!important;gap:16px!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-copy h1{font-size:clamp(2.2rem,11vw,3.35rem)!important;line-height:.94!important;letter-spacing:-.045em!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-copy p{font-size:15px!important;line-height:1.45!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-hero-actions{grid-template-columns:1fr!important;gap:8px!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-hero-actions .btn{min-height:50px!important;font-size:15px!important;border-radius:16px!important;text-align:center!important;justify-content:center!important}
+ .native-app-shell [data-active-page="jugar"] .player-panel{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;gap:10px!important;padding:12px!important;border-radius:18px!important}
+ .native-app-shell [data-active-page="jugar"] .player-panel .presence{grid-column:1/-1!important;width:100%!important;margin:0!important;padding:8px 10px!important;border-radius:13px!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-tabs{padding:5px!important;border-radius:18px!important;gap:3px!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-tabs button{padding:9px 11px!important;border-radius:13px!important;font-size:13px!important}
+ .native-app-shell [data-active-page="jugar"] .continue-hero{grid-template-columns:52px minmax(0,1fr)!important;padding:15px!important;border-radius:22px!important;gap:10px!important}
+ .native-app-shell [data-active-page="jugar"] .continue-icon{width:52px!important;height:52px!important}
+ .native-app-shell [data-active-page="jugar"] .continue-copy h2{font-size:1.4rem!important}
+ .native-app-shell [data-active-page="jugar"] .continue-hero .btn{grid-column:1/-1!important;width:100%!important;min-width:0!important;min-height:46px!important;border-radius:14px!important}
+ .native-app-shell [data-active-page="jugar"] .mode-lanes{gap:8px!important}
+ .native-app-shell [data-active-page="jugar"] .mode-lanes button{display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;gap:10px!important;align-items:center!important;padding:13px!important;border-radius:18px!important;text-align:left!important}
+ .native-app-shell [data-active-page="jugar"] .mode-lanes button>span{grid-row:1/3!important;font-size:26px!important}
+ .native-app-shell [data-active-page="jugar"] .mode-lanes button>em{grid-column:2!important;justify-self:start!important;font-style:normal!important;font-size:12px!important}
+ .native-app-shell [data-active-page="jugar"] .pending-card{padding:12px!important;border-radius:20px!important}
+ .native-app-shell [data-active-page="jugar"] .pending-main{width:100%!important;grid-template-columns:48px minmax(0,1fr)!important}
+ .native-app-shell [data-active-page="jugar"] .pending-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;width:100%!important}
+ .native-app-shell [data-active-page="jugar"] .pending-actions button{min-height:42px!important;border-radius:13px!important}
+}
