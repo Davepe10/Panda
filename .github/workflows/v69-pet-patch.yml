@@ -1,0 +1,62 @@
+name: V69 Pet Geometry Patch
+
+on:
+  push:
+    branches: [responsive-unified-v69]
+    paths:
+      - '.github/workflows/v69-pet-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-pet:
+    if: ${{ !contains(github.event.head_commit.message, '[pet-v69]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: responsive-unified-v69
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Correct ground contact, gait and wearables
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs')
+          const p='components/world/Pet3D.tsx'
+          let s=fs.readFileSync(p,'utf8')
+          const swaps=[
+            ["const freq=run?9.6:behavior==='sniff'?4.2:6.4,amp=run?.66:behavior==='sniff'?.28:.44","const freq=run?9.2:behavior==='sniff'?4.0:6.0,amp=run?.30:behavior==='sniff'?.14:.18"],
+            ["const baseY=sleep?-.20:sit?-.08:locomotion?Math.abs(Math.sin(t*freq))*0.05:Math.sin(t*2.1)*.008","const baseY=sleep?-.065:sit?-.018:locomotion?Math.abs(Math.sin(t*freq))*0.010:Math.sin(t*2.1)*.004"],
+            ["position={[x,-.55,z]}","position={[x,-.50,z]}"],
+            ["position={[0,-.18,0]} scale={[.23,.58,.23]}","position={[0,-.13,0]} scale={[.24,.50,.24]}"],
+            ["<Paw position={[0,-.55,.08]}","<Paw position={[0,-.45,.08]}"],
+            ["growthStage==='baby'?-.04:growthStage==='adult'?.24:.15","growthStage==='baby'?-.08:growthStage==='adult'?.18:.09"],
+            ["position={[0,1.01,.18]}","position={[0,.84,.22]}"],
+            ["position={[0,1.05,.08]}","position={[0,.90,.11]}"],
+            ["position={[0,1.07,.10]}","position={[0,.91,.13]}"],
+            ["position={[0,1.15,.09]}","position={[0,1.04,.10]}"],
+            ["position={[0,1.17,.09]}","position={[0,1.06,.10]}"],
+          ]
+          let changed=0
+          for(const [from,to] of swaps){
+            if(s.includes(from)){s=s.replace(from,to);changed++}
+          }
+          if(changed<9){console.error(`Expected at least 9 pet fixes, applied ${changed}`);process.exit(1)}
+          fs.writeFileSync(p,s)
+          console.log(`Applied ${changed} V69 pet fixes`)
+          NODE
+      - name: Validate source
+        run: |
+          node scripts/validate-project.mjs
+          node scripts/verify-deploy-files.mjs
+      - name: Commit generated source fix
+        run: |
+          git config user.name 'Pandalandia V69 Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add components/world/Pet3D.tsx
+          git diff --cached --quiet && exit 0
+          git commit -m 'fix: ground Mia and attach wearables better [pet-v69]'
+          git push origin HEAD:responsive-unified-v69
