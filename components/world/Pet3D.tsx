@@ -102,7 +102,7 @@ function Cocker({mood='happy'}:{mood?:Mood}){
 }
 
 
-function PremiumCocker({mood='happy',behavior='idle',behaviorNonce=0,onInteract}:{mood?:Mood;behavior?:PetBehavior;behaviorNonce?:number;onInteract?:()=>void}){
+function PremiumCocker({mood='happy',behavior='idle',behaviorNonce=0,items=[],onInteract}:{mood?:Mood;behavior?:PetBehavior;behaviorNonce?:number;items?:string[];onInteract?:()=>void}){
  const root=useRef<THREE.Group>(null),head=useRef<THREE.Group>(null),earL=useRef<THREE.Group>(null),earR=useRef<THREE.Group>(null),tail=useRef<THREE.Group>(null)
  const legs=[useRef<THREE.Group>(null),useRef<THREE.Group>(null),useRef<THREE.Group>(null),useRef<THREE.Group>(null)]
  const target=useRef(new THREE.Vector3(0,0,0)),nextWaypointAt=useRef(0)
@@ -154,6 +154,7 @@ function PremiumCocker({mood='happy',behavior='idle',behaviorNonce=0,onInteract}
    <mesh position={[0,-.10,.51]} scale={[1.05,.72,.82]} castShadow><sphereGeometry args={[.34,38,26]}/><meshPhysicalMaterial {...fur('#efd5bb',.88)}/></mesh>
    <Eye position={[-.22,.17,.53]} sleepy={sleepy} scale={1.18}/><Eye position={[.22,.17,.53]} sleepy={sleepy} scale={1.18}/>
    <Nose position={[0,-.02,.72]} scale={.90}/><Mouth mood={mood} z={.73}/><Blush x={-.34} z={.58}/><Blush x={.34} z={.58}/>
+   <Wearables items={items} behavior={behavior} mount="head"/>
   </group>
   <Leg r={legs[0]} x={-.34} z={.42}/><Leg r={legs[1]} x={.34} z={.42}/><Leg r={legs[2]} x={-.36} z={-.46} dark/><Leg r={legs[3]} x={.36} z={-.46} dark/>
   <group ref={tail} position={[.53,-.15,-.70]} rotation={[0,0,-.35]}><mesh rotation={[Math.PI/2,0,0]} scale={[.22,.22,.68]} castShadow><capsuleGeometry args={[.16,.55,8,16]}/><meshPhysicalMaterial {...fur('#8f5038')}/></mesh></group>
@@ -207,21 +208,23 @@ function Capybara({mood='happy'}:{mood?:Mood}){
 }
 
 
-function Wearables({items=[],behavior='idle'}:{items?:string[];behavior?:PetBehavior}){
- const has=(k:string)=>items.includes(k)
+const HEAD_WEARABLE_IDS=new Set(['bow_red','cap','flower_crown','gold_crown','diamond_crown','round_glasses','heart_glasses'])
+function Wearables({items=[],behavior='idle',mount='body'}:{items?:string[];behavior?:PetBehavior;mount?:'head'|'body'}){
+ const mountedItems=items.filter(id=>mount==='head'?HEAD_WEARABLE_IDS.has(id):!HEAD_WEARABLE_IDS.has(id))
+ const has=(k:string)=>mountedItems.includes(k)
  const textile=(color:string)=><meshPhysicalMaterial color={color} roughness={.84} metalness={0} sheen={.42} sheenRoughness={.78}/>
  const glossy=(color:string)=><meshPhysicalMaterial color={color} roughness={.16} metalness={.08} clearcoat={.92} clearcoatRoughness={.08}/>
  const metal=(color:string)=><meshPhysicalMaterial color={color} roughness={.22} metalness={.82} clearcoat={.28} clearcoatRoughness={.14}/>
  const anchor=useRef<THREE.Group>(null)
  useFrame(({clock})=>{if(!anchor.current)return;const t=clock.elapsedTime;anchor.current.position.y=behavior==='walk'||behavior==='run'||behavior==='play'?Math.abs(Math.sin(t*(behavior==='run'?9:6)))*.025:0;anchor.current.rotation.z=behavior==='wag'||behavior==='pet'?Math.sin(t*3)*.018:0})
  return <group ref={anchor}>
-  {has('bow_red')&&<group position={[0,1.01,.18]} rotation={[0,0,-.08]}><mesh position={[-.16,0,0]} rotation={[0,0,.55]}><sphereGeometry args={[.13,20,12]}/>{textile('#ef6f91')}</mesh><mesh position={[.16,0,0]} rotation={[0,0,-.55]}><sphereGeometry args={[.13,20,12]}/>{textile('#ef6f91')}</mesh><mesh><sphereGeometry args={[.07,16,10]}/>{glossy('#d94e76')}</mesh></group>}
-  {has('cap')&&<group position={[0,1.05,.08]} rotation={[0.08,0,0]}><mesh><sphereGeometry args={[.42,28,18,0,Math.PI*2,0,Math.PI/2]}/>{textile('#6f86d6')}</mesh><mesh position={[0,-.02,.34]} scale={[1.2,.18,.55]}><sphereGeometry args={[.22,20,12]}/>{textile('#5b70bd')}</mesh></group>}
-  {has('flower_crown')&&<group position={[0,1.07,.10]}>{[-.28,-.14,0,.14,.28].map((x,i)=><mesh key={i} position={[x,Math.abs(x)*-.08,.26-Math.abs(x)*.18]}><sphereGeometry args={[.085,16,10]}/><meshPhysicalMaterial color={i%2?'#ffd0df':'#fff0a8'} roughness={.72} sheen={.32} sheenRoughness={.82}/></mesh>)}</group>}
-  {has('gold_crown')&&<group position={[0,1.15,.09]}><mesh><cylinderGeometry args={[.30,.36,.20,5,1,true]}/>{metal('#e2b84b')}</mesh><mesh position={[0,.12,0]}><torusGeometry args={[.31,.035,10,28]}/>{metal('#f0cc62')}</mesh></group>}
-  {has('diamond_crown')&&<group position={[0,1.17,.09]}><mesh><cylinderGeometry args={[.32,.38,.22,7,1,true]}/><meshPhysicalMaterial color="#d6eef7" metalness={.62} roughness={.10} clearcoat={1} clearcoatRoughness={.04}/></mesh><mesh position={[0,.05,.31]}><octahedronGeometry args={[.08,0]}/><meshPhysicalMaterial color="#8ee7ff" emissive="#4dc7f0" emissiveIntensity={.28} transmission={.18} roughness={.08} clearcoat={1}/></mesh></group>}
-  {has('round_glasses')&&<group position={[0,.62,.65]}><mesh position={[-.25,0,0]}><torusGeometry args={[.13,.018,10,28]}/>{metal('#2d2730')}</mesh><mesh position={[.25,0,0]}><torusGeometry args={[.13,.018,10,28]}/>{metal('#2d2730')}</mesh><mesh scale={[.12,.015,.015]}><boxGeometry args={[1,1,1]}/>{metal('#2d2730')}</mesh></group>}
-  {has('heart_glasses')&&<group position={[0,.62,.67]}>{[-.25,.25].map((x,i)=><group key={i} position={[x,0,0]}><mesh rotation={[0,0,Math.PI/4]} scale={[1,.9,.15]}><boxGeometry args={[.18,.18,.04]}/><meshPhysicalMaterial color="#f06f9c" transparent opacity={.68} roughness={.10} clearcoat={1} transmission={.08}/></mesh></group>)}<mesh scale={[.12,.015,.015]}><boxGeometry args={[1,1,1]}/>{metal('#b8416a')}</mesh></group>}
+  {has('bow_red')&&<group position={[0,.34,-.20]} rotation={[0,0,-.08]}><mesh position={[-.16,0,0]} rotation={[0,0,.55]}><sphereGeometry args={[.13,20,12]}/>{textile('#ef6f91')}</mesh><mesh position={[.16,0,0]} rotation={[0,0,-.55]}><sphereGeometry args={[.13,20,12]}/>{textile('#ef6f91')}</mesh><mesh><sphereGeometry args={[.07,16,10]}/>{glossy('#d94e76')}</mesh></group>}
+  {has('cap')&&<group position={[0,.40,-.31]} rotation={[0.08,0,0]}><mesh><sphereGeometry args={[.42,28,18,0,Math.PI*2,0,Math.PI/2]}/>{textile('#6f86d6')}</mesh><mesh position={[0,-.02,.34]} scale={[1.2,.18,.55]}><sphereGeometry args={[.22,20,12]}/>{textile('#5b70bd')}</mesh></group>}
+  {has('flower_crown')&&<group position={[0,.41,-.29]}>{[-.28,-.14,0,.14,.28].map((x,i)=><mesh key={i} position={[x,Math.abs(x)*-.08,.26-Math.abs(x)*.18]}><sphereGeometry args={[.085,16,10]}/><meshPhysicalMaterial color={i%2?'#ffd0df':'#fff0a8'} roughness={.72} sheen={.32} sheenRoughness={.82}/></mesh>)}</group>}
+  {has('gold_crown')&&<group position={[0,.54,-.32]}><mesh><cylinderGeometry args={[.30,.36,.20,5,1,true]}/>{metal('#e2b84b')}</mesh><mesh position={[0,.12,0]}><torusGeometry args={[.31,.035,10,28]}/>{metal('#f0cc62')}</mesh></group>}
+  {has('diamond_crown')&&<group position={[0,.56,-.32]}><mesh><cylinderGeometry args={[.32,.38,.22,7,1,true]}/><meshPhysicalMaterial color="#d6eef7" metalness={.62} roughness={.10} clearcoat={1} clearcoatRoughness={.04}/></mesh><mesh position={[0,.05,.31]}><octahedronGeometry args={[.08,0]}/><meshPhysicalMaterial color="#8ee7ff" emissive="#4dc7f0" emissiveIntensity={.28} transmission={.18} roughness={.08} clearcoat={1}/></mesh></group>}
+  {has('round_glasses')&&<group position={[0,.12,.23]}><mesh position={[-.25,0,0]}><torusGeometry args={[.13,.018,10,28]}/>{metal('#2d2730')}</mesh><mesh position={[.25,0,0]}><torusGeometry args={[.13,.018,10,28]}/>{metal('#2d2730')}</mesh><mesh scale={[.12,.015,.015]}><boxGeometry args={[1,1,1]}/>{metal('#2d2730')}</mesh></group>}
+  {has('heart_glasses')&&<group position={[0,.12,.25]}>{[-.25,.25].map((x,i)=><group key={i} position={[x,0,0]}><mesh rotation={[0,0,Math.PI/4]} scale={[1,.9,.15]}><boxGeometry args={[.18,.18,.04]}/><meshPhysicalMaterial color="#f06f9c" transparent opacity={.68} roughness={.10} clearcoat={1} transmission={.08}/></mesh></group>)}<mesh scale={[.12,.015,.015]}><boxGeometry args={[1,1,1]}/>{metal('#b8416a')}</mesh></group>}
   {has('bandana')&&<group position={[0,.12,.34]}><mesh rotation={[Math.PI/2,0,0]}><torusGeometry args={[.48,.045,12,36]}/>{textile('#df5e66')}</mesh><mesh position={[0,-.08,.40]} rotation={[0,0,Math.PI/4]}><planeGeometry args={[.26,.26]}/><meshPhysicalMaterial color="#df5e66" side={THREE.DoubleSide} roughness={.9} sheen={.38}/></mesh></group>}
   {has('hoodie')&&<mesh position={[0,-.20,.04]} scale={[1.03,.82,.88]}><sphereGeometry args={[.69,32,22,0,Math.PI*2,.48,2.15]}/><meshPhysicalMaterial color="#b5a5e8" roughness={.94} sheen={.48} sheenRoughness={.82} transparent opacity={.90}/></mesh>}
   {has('royal_cape')&&<mesh position={[0,-.15,-.40]} rotation={[-.14,0,0]}><planeGeometry args={[1.18,1.35,1,1]}/><meshPhysicalMaterial color="#7f2945" side={THREE.DoubleSide} roughness={.78} sheen={.62} sheenRoughness={.66}/></mesh>}
@@ -464,14 +467,14 @@ function RiggedPetAsset({type,mood='happy',behavior='idle'}:{type:PetType;mood?:
 }
 
 
-function ProceduralPet({type,mood,behavior='idle',behaviorNonce=0,onInteract}:{type:PetType;mood:Mood;behavior?:PetBehavior;behaviorNonce?:number;onInteract?:()=>void}){
- return type==='panda'?<Panda mood={mood}/>:type==='shiba'?<Shiba mood={mood}/>:type==='capybara'?<Capybara mood={mood}/>:<PremiumCocker mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} onInteract={onInteract}/>
+function ProceduralPet({type,mood,behavior='idle',behaviorNonce=0,items=[],onInteract}:{type:PetType;mood:Mood;behavior?:PetBehavior;behaviorNonce?:number;items?:string[];onInteract?:()=>void}){
+ return type==='panda'?<Panda mood={mood}/>:type==='shiba'?<Shiba mood={mood}/>:type==='capybara'?<Capybara mood={mood}/>:<PremiumCocker mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} items={items} onInteract={onInteract}/>
 }
 
-function HighFidelityPet({type,mood,behavior='idle',behaviorNonce=0,onInteract}:{type:PetType;mood:Mood;behavior?:PetBehavior;behaviorNonce?:number;onInteract?:()=>void}){
- if(type==='cocker')return <PremiumCocker mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} onInteract={onInteract}/>
+function HighFidelityPet({type,mood,behavior='idle',behaviorNonce=0,items=[],onInteract}:{type:PetType;mood:Mood;behavior?:PetBehavior;behaviorNonce?:number;items?:string[];onInteract?:()=>void}){
+ if(type==='cocker')return <PremiumCocker mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} items={items} onInteract={onInteract}/>
  const asset=RIGGED_PET_ASSETS[type]
- const fallback=<ProceduralPet type={type} mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} onInteract={onInteract}/>
+ const fallback=<ProceduralPet type={type} mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} items={items} onInteract={onInteract}/>
  if(!asset)return fallback
  return <PetAssetBoundary fallback={fallback}><Suspense fallback={fallback}><RiggedPetAsset type={type} mood={mood} behavior={behavior}/></Suspense></PetAssetBoundary>
 }
@@ -497,7 +500,7 @@ export function PetModel({type,mood='happy',interactive=true,growthStage='young'
   root.current.scale.setScalar(stageScale*(1+breathe))
  })
  void interactive;void behaviorNonce
- return <group ref={root}><HighFidelityPet type={type} mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} onInteract={interactive?onInteract:undefined}/><Wearables items={items} behavior={behavior}/><PetStatusEffects mood={mood}/></group>
+ return <group ref={root}><HighFidelityPet type={type} mood={mood} behavior={behavior} behaviorNonce={behaviorNonce} items={items} onInteract={interactive?onInteract:undefined}/><Wearables items={items} behavior={behavior} mount="body"/><PetStatusEffects mood={mood}/></group>
 }
 
 function PreviewScene({type}:{type:PetType}){return <><PBREnvironment intensity={.72}/><ambientLight intensity={.95}/><hemisphereLight args={['#fff7f2','#87756b',1.4]}/><directionalLight position={[3,5,4]} intensity={2.5}/><directionalLight position={[-3,2,2]} intensity={.7} color="#d9e8ff"/><PetModel type={type} interactive={false}/><ContactShadows position={[0,-1.06,0]} opacity={.32} scale={3.5} blur={2.6} far={2.5}/></>}
