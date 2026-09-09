@@ -1,0 +1,102 @@
+/* PANDALANDIA 69 — unified responsive contract */
+:root{
+  --ui-page-max:1440px;
+  --ui-page-pad:clamp(10px,2.1vw,28px);
+  --ui-section-gap:clamp(10px,1.6vw,20px);
+  --ui-card-radius:clamp(18px,2vw,28px);
+  --ui-nav-h:76px;
+  --ui-readable:#526177;
+}
+html,body,#__next,.native-app-shell{width:100%;max-width:100%;overflow-x:hidden!important}
+.native-app-shell .app-wrap{width:min(var(--ui-page-max),100%)!important;max-width:var(--ui-page-max)!important;margin-inline:auto!important;padding-inline:var(--ui-page-pad)!important;min-width:0!important}
+.native-app-shell .app-wrap>*{min-width:0!important;max-width:100%}
+.native-app-shell :is(.content-page,.settings-page,.game-shell,.game-hub-v9,.solo-room,.world-shell-v30,.home-premium-v63){width:100%!important;max-width:100%!important;min-width:0!important;margin-inline:auto!important}
+.native-app-shell :is(section,article,header,main,aside,nav,form,fieldset,div){min-width:0}
+.native-app-shell :is(img,video,canvas,svg){max-width:100%}
+.native-app-shell :is(h1,h2,h3,h4,p,small,label,b,strong,span){overflow-wrap:break-word}
+.native-app-shell .page-head h1,.native-app-shell .arcade-copy h1,.native-app-shell .home63-copy h1{font-size:clamp(2rem,5vw,4.5rem)!important;line-height:.96!important}
+.native-app-shell :is(.content-page,.settings-page,.game-shell,.world-shell-v30) h2{font-size:clamp(1.25rem,2.4vw,2rem)}
+.native-app-shell :is(.content-page,.settings-page,.game-shell,.world-shell-v30) p{line-height:1.55}
+.native-app-shell :is(.reflection-card,.soft-card,.compose,.agreement-row,.settings-card,.game-card,.pending-card,.round-card,.solo-game-card,.challenge-card,.achievement,.pet-needs-v63,.pet-autonomy-v63,.pet-life-v63,.special-actions-card,.garden-card,.expedition-active,.shop-grid article,.wardrobe-grid article,.home63-feature,.home63-pet-card,.home63-couple-card) :is(p,small,.muted,label){color:var(--ui-readable)!important;opacity:1!important}
+.native-app-shell :is(.reflection-card,.soft-card,.compose,.agreement-row,.settings-card,.game-card,.pending-card,.round-card,.solo-game-card,.challenge-card,.achievement,.pet-needs-v63,.pet-autonomy-v63,.pet-life-v63,.special-actions-card,.garden-card,.expedition-active,.shop-grid article,.wardrobe-grid article) :is(h1,h2,h3,h4,b,strong){color:var(--pf-ink)!important;opacity:1!important}
+.native-app-shell :is(.page-head,.arcade-hero,.continue-hero,.world-top-v30,.home63-hero) :is(h1,h2,h3,h4,b,strong){color:#fff!important}
+.native-app-shell :is(.page-head,.arcade-hero,.continue-hero,.world-top-v30,.home63-hero) :is(p,small,.muted){color:#e5edf4!important;opacity:1!important}
+.native-app-shell :is(.home63-grid,.shared-columns,.reflection-layout,.game-grid,.arcade-grid,.achievement-grid,.shop-grid,.wardrobe-grid,.garden-grid,.expedition-grid,.pet-home-premium-v63){width:100%!important;max-width:100%!important;min-width:0!important;gap:var(--ui-section-gap)!important}
+.native-app-shell :is(.home63-grid,.shared-columns,.reflection-layout,.game-grid,.arcade-grid,.achievement-grid,.shop-grid,.wardrobe-grid,.garden-grid,.expedition-grid)>*{min-width:0!important;max-width:100%!important}
+.native-app-shell :is(.page-head,.world-top-v30,.arcade-hero,.home63-hero){width:100%!important;max-width:100%!important}
+.native-app-shell :is(.world-tabs-v30,.game-subnav,.filters,.arcade-tabs,.chapter-list){max-width:100%!important}
+.native-app-shell .world-tabs-v30 button,.native-app-shell .game-subnav button,.native-app-shell .filters button{white-space:nowrap}
+.native-app-shell .mobile-nav{left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(680px,calc(100vw - max(14px,env(safe-area-inset-left)) - max(14px,env(safe-area-inset-right))))!important;max-width:calc(100vw - 14px)!important;bottom:max(8px,env(safe-area-inset-bottom))!important}
+.native-app-shell .app-wrap{padding-bottom:calc(var(--ui-nav-h) + 36px + env(safe-area-inset-bottom))!important}
+.pet-stage-premium-v63{width:100%!important;max-width:100%!important;overflow:hidden!important;contain:layout paint!important}
+.pet-room-3d-layer,.premium-pet-room,.premium-pet-room canvas{width:100%!important;height:100%!important;max-width:100%!important}
+.pet-needs-v63{min-width:0!important;overflow:hidden}
+.pet-needs-grid,.pet-care-dock-v67{width:100%!important;max-width:100%!important}
+.pet-need,.pet-care-dock-v67 button{min-width:0!important}
+
+@media(max-width:767px){
+ :root{--ui-page-pad:max(8px,env(safe-area-inset-left));--ui-section-gap:9px;--ui-nav-h:70px}
+ .native-app-shell .app-wrap{padding-left:max(8px,env(safe-area-inset-left))!important;padding-right:max(8px,env(safe-area-inset-right))!important}
+ .native-app-shell :is(.content-page,.settings-page,.game-shell,.world-shell-v30,.home-premium-v63){padding-inline:0!important;margin-inline:0!important}
+ .native-app-shell :is(.page-head,.world-top-v30,.arcade-hero,.home63-hero){padding:18px 15px!important;border-radius:22px!important}
+ .native-app-shell .home63-hero{display:grid!important;grid-template-columns:1fr!important;gap:14px!important}
+ .native-app-shell .home63-actions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+ .native-app-shell .home63-actions>*{width:100%!important;min-width:0!important}
+ .native-app-shell .home63-couple-card,.native-app-shell .home63-pet-card{width:100%!important}
+ .native-app-shell .home63-grid{display:grid!important;grid-template-columns:1fr!important}
+ .native-app-shell .reflection-layout,.native-app-shell .shared-columns{display:grid!important;grid-template-columns:1fr!important}
+ .native-app-shell .chapter-list{display:flex!important;overflow-x:auto!important;overscroll-behavior-x:contain;scrollbar-width:none;padding:5px!important}
+ .native-app-shell .chapter-list::-webkit-scrollbar{display:none}
+ .native-app-shell .chapter-list button{flex:0 0 auto!important;white-space:nowrap!important}
+ .native-app-shell .compose :is(input,textarea),.native-app-shell .agreement-row :is(input,textarea){width:100%!important;max-width:100%!important}
+ .native-app-shell [data-active-page="jugar"] :is(.game-grid,.arcade-grid,.pending-rail,.pending-list,.game-turn-list,.mode-lanes){display:grid!important;grid-template-columns:1fr!important;grid-auto-flow:row!important;grid-auto-columns:auto!important;overflow:visible!important;width:100%!important}
+ .native-app-shell [data-active-page="jugar"] :is(.game-card,.arcade-game-card,.pending-card,.arcade-pending,.mode-lanes button){width:100%!important;max-width:100%!important;min-width:0!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-tabs{display:flex!important;overflow-x:auto!important;scrollbar-width:none!important}
+ .native-app-shell [data-active-page="jugar"] .arcade-tabs::-webkit-scrollbar{display:none}
+ .native-app-shell [data-active-page="jugar"] .arcade-tabs button{flex:0 0 auto!important}
+ .native-app-shell .world-top-v30{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+ .native-app-shell .world-currency{justify-self:start!important}
+ .native-app-shell .world-tabs-v30{display:flex!important;width:100%!important;overflow-x:auto!important;scroll-snap-type:x proximity;scrollbar-width:none!important;padding:5px!important}
+ .native-app-shell .world-tabs-v30::-webkit-scrollbar{display:none}
+ .native-app-shell .world-tabs-v30 button{flex:0 0 auto!important;min-width:max-content!important;scroll-snap-align:start}
+ .native-app-shell .pet-home-premium-v63{display:grid!important;grid-template-columns:1fr!important}
+ .pet-stage-premium-v63{height:clamp(370px,53dvh,520px)!important;min-height:370px!important}
+ .pet-needs-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .pet-care-dock-v67{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .native-app-shell :is(.shop-grid,.wardrobe-grid,.garden-grid,.expedition-grid){display:grid!important;grid-template-columns:1fr!important}
+ .native-app-shell .shop-filter-row{display:flex!important;overflow-x:auto!important;scrollbar-width:none!important;gap:6px!important}
+ .native-app-shell .shop-filter-row::-webkit-scrollbar{display:none}
+ .native-app-shell .shop-filter-row button{flex:0 0 auto!important;white-space:nowrap!important}
+ .native-app-shell :is(input,textarea,select,button){max-width:100%}
+ .native-app-shell textarea{resize:vertical}
+}
+
+@media(min-width:768px) and (max-width:1180px){
+ :root{--ui-page-pad:clamp(18px,3vw,32px)}
+ .native-app-shell .home63-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .native-app-shell .shared-columns{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .native-app-shell .reflection-layout{grid-template-columns:minmax(180px,.38fr) minmax(0,1fr)!important}
+ .native-app-shell [data-active-page="jugar"] :is(.game-grid.arcade-grid,.mode-lanes){grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .native-app-shell :is(.shop-grid,.wardrobe-grid,.garden-grid,.expedition-grid){grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .native-app-shell .pet-home-premium-v63{grid-template-columns:1fr!important}
+ .pet-stage-premium-v63{height:clamp(480px,58vh,650px)!important}
+ .pet-needs-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+@media(min-width:1181px){
+ .native-app-shell .home63-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .native-app-shell .shared-columns{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .native-app-shell .reflection-layout{grid-template-columns:minmax(210px,.30fr) minmax(0,1fr)!important}
+ .native-app-shell [data-active-page="jugar"] .game-grid.arcade-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .native-app-shell [data-active-page="jugar"] .mode-lanes{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .native-app-shell :is(.shop-grid,.wardrobe-grid,.garden-grid,.expedition-grid){grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .native-app-shell .pet-home-premium-v63{grid-template-columns:minmax(0,1.55fr) minmax(340px,.75fr)!important;align-items:stretch!important}
+ .pet-stage-premium-v63{height:clamp(560px,66vh,760px)!important}
+ .pet-needs-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+
+@media(min-width:1600px){
+ :root{--ui-page-max:1540px}
+ .native-app-shell [data-active-page="jugar"] .game-grid.arcade-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .native-app-shell :is(.shop-grid,.wardrobe-grid){grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
