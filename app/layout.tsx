@@ -3,6 +3,7 @@ import type {Metadata,Viewport} from 'next'
 import './globals.css'
 import './final.css'
 import './responsive-v69.css'
+import './v70.css'
 
 export const metadata:Metadata={
  title:'Pandalandia — solo para dos',
