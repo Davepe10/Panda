@@ -19,6 +19,8 @@
 .native-app-shell .world-tabs-v30 button{color:#52657a!important;-webkit-text-fill-color:#52657a!important;opacity:1!important}
 .native-app-shell .world-tabs-v30 button.active{color:#fff!important;-webkit-text-fill-color:#fff!important;background:#2d746a!important}
 .native-app-shell :is(.pet-needs-v63,.pet-autonomy-v63,.pet-life-v63,.special-actions-card,.shop-card,.wardrobe-card,.garden-card,.expedition-card) :is(p,small,span,label){opacity:1!important}
+/* Removed: the stage prompt bar covered food/water props and did not add a useful action. */
+.native-app-shell .pet-speech-v63{display:none!important}
 @media(max-width:767px){
  .native-app-shell .app-wrap{padding-inline:10px!important;padding-bottom:calc(92px + env(safe-area-inset-bottom))!important}
  .native-app-shell .mobile-appbar{margin-left:-10px!important;margin-right:-10px!important;padding-left:14px!important;padding-right:14px!important}
